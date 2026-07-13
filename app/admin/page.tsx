@@ -1,10 +1,13 @@
 import Link from 'next/link';
+import { unstable_noStore as noStore } from 'next/cache';
 import { supabaseServer } from '@/lib/supabaseServer';
 import LogoutButton from '@/components/LogoutButton';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function AdminDashboard() {
+  noStore();
   const supabase = supabaseServer();
 
   const [{ count: fileCount }, { count: imageCount }, { data: events }, { data: reactions }] =

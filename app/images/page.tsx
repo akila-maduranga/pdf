@@ -1,9 +1,12 @@
 import Link from 'next/link';
+import { unstable_noStore as noStore } from 'next/cache';
 import { supabaseServer } from '@/lib/supabaseServer';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function ImagesPage() {
+  noStore();
   const supabase = supabaseServer();
   const { data: images } = await supabase
     .from('images')

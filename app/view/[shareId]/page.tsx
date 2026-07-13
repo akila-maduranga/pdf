@@ -1,3 +1,4 @@
+import { unstable_noStore as noStore } from 'next/cache';
 import { supabaseServer } from '@/lib/supabaseServer';
 import PdfViewer from '@/components/PdfViewer';
 import ImageViewer from '@/components/ImageViewer';
@@ -6,6 +7,9 @@ import ViewTracker from '@/components/ViewTracker';
 import ViewOnlyGuard from '@/components/ViewOnlyGuard';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 async function getItem(shareId: string) {
   const supabase = supabaseServer();
@@ -28,6 +32,7 @@ async function getItem(shareId: string) {
 }
 
 export default async function ViewPage({ params }: { params: { shareId: string } }) {
+  noStore();
   const result = await getItem(params.shareId);
   if (!result) notFound();
 

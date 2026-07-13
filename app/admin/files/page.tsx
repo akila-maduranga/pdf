@@ -1,11 +1,14 @@
 import Link from 'next/link';
+import { unstable_noStore as noStore } from 'next/cache';
 import { supabaseServer } from '@/lib/supabaseServer';
 import UploadFileForm from '@/components/UploadFileForm';
 import AdminItemRow from '@/components/AdminItemRow';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function AdminFilesPage() {
+  noStore();
   const supabase = supabaseServer();
   const { data: files } = await supabase
     .from('files')

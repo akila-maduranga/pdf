@@ -1,8 +1,10 @@
 import Link from 'next/link';
+import { unstable_noStore as noStore } from 'next/cache';
 import { supabaseServer } from '@/lib/supabaseServer';
 import { notFound } from 'next/navigation';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function AdminItemDetail({
   params,
@@ -11,6 +13,7 @@ export default async function AdminItemDetail({
   params: { id: string };
   searchParams: { type?: string };
 }) {
+  noStore();
   const type = searchParams.type === 'image' ? 'image' : 'file';
   const table = type === 'file' ? 'files' : 'images';
 
