@@ -3,57 +3,70 @@ import { supabaseServer } from '@/lib/supabaseServer';
 
 export const runtime = 'nodejs';
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
-  const body = await req.json().catch(() => null);
-  const itemType = body?.itemType === 'image' ? 'image' : body?.itemType === 'file' ? 'file' : null;
-  const itemId = body?.itemId as string | undefined;
-
-  if (!itemType || !itemId) {
-    return NextResponse.json({ error: 'itemType and itemId are required' }, { status: 400 });
-  }
-
+export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   const supabase = supabaseServer();
 
-  const { count } = await supabase
-    .from('collection_items')
-    .select('*', { count: 'exact', head: true })
-    .eq('collection_id', params.id);
+  const { data: collection, error } = await supabase
+    .from('collections')
+    .select('*')
+    .eq('id', params.id)
+    .single();
+  if (error || !collection) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-  const { error } = await supabase.from('collection_items').insert({
-    collection_id: params.id,
-    item_type: itemType,
-    item_id: itemId,
-    part_number: (count || 0) + 1,
+  const { data: items } = await supabase
+    .from('collection_items')
+    .select('*')
+    .eq('collection_id', params.id)
+    .order('part_number', { ascending: true });
+
+  const fileIds = (items || []).filter((i) => i.item_type === 'file').map((i) => i.item_id);
+  const imageIds = (items || []).filter((i) => i.item_type === 'image').map((i) => i.item_id);
+
+  const [{ data: files }, { data: images }] = await Promise.all([
+    fileIds.length
+      ? supabase.from('files').select('id, title, share_id').in('id', fileIds)
+      : Promise.resolve({ data: [] as any[] }),
+    imageIds.length
+      ? supabase.from('images').select('id, title, share_id').in('id', imageIds)
+      : Promise.resolve({ data: [] as any[] }),
+  ]);
+
+  const fileMap = new Map((files || []).map((f) => [f.id, f]));
+  const imageMap = new Map((images || []).map((i) => [i.id, i]));
+
+  const resolvedItems = (items || []).map((item) => {
+    const source = item.item_type === 'file' ? fileMap.get(item.item_id) : imageMap.get(item.item_id);
+    return {
+      id: item.id,
+      itemType: item.item_type,
+      itemId: item.item_id,
+      partNumber: item.part_number,
+      title: source?.title || '(removed)',
+      shareId: source?.share_id || null,
+    };
   });
 
-  if (error) {
-    if (error.code === '23505') {
-      return NextResponse.json({ error: 'That item is already part of this collection' }, { status: 409 });
-    }
-    return NextResponse.json({ error: error.message }, { status: 500 });
-  }
+  return NextResponse.json({ collection, items: resolvedItems });
+}
 
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+  const body = await req.json().catch(() => null);
+  if (!body) return NextResponse.json({ error: 'Bad request' }, { status: 400 });
+
+  const update: Record<string, unknown> = {};
+  if (typeof body.title === 'string') update.title = body.title.trim();
+  if (typeof body.description === 'string') update.description = body.description.trim();
+  if ('categoryId' in body) update.category_id = body.categoryId || null;
+
+  const supabase = supabaseServer();
+  const { error } = await supabase.from('collections').update(update).eq('id', params.id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
 }
 
-// Bulk reorder: body = { order: [collectionItemId, collectionItemId, ...] } in the new order.
-export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
-  const body = await req.json().catch(() => null);
-  const order = body?.order as number[] | undefined;
-  if (!Array.isArray(order) || !order.length) {
-    return NextResponse.json({ error: 'order array is required' }, { status: 400 });
-  }
-
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   const supabase = supabaseServer();
-  await Promise.all(
-    order.map((itemId, index) =>
-      supabase
-        .from('collection_items')
-        .update({ part_number: index + 1 })
-        .eq('id', itemId)
-        .eq('collection_id', params.id)
-    )
-  );
-
+  const { error } = await supabase.from('collections').delete().eq('id', params.id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true });
 }
