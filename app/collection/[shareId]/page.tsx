@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { unstable_noStore as noStore } from 'next/cache';
 import { supabaseServer } from '@/lib/supabaseServer';
+import { hybridPath } from '@/lib/slugify';
 import SiteHeader from '@/components/SiteHeader';
 import ShareButton from '@/components/ShareButton';
 
@@ -63,7 +64,7 @@ export default async function CollectionPage({ params }: { params: { shareId: st
             <h1 className="font-display text-3xl font-semibold">{collection.title}</h1>
             {collection.description ? <p className="mt-2 text-paper/60">{collection.description}</p> : null}
           </div>
-          <ShareButton path={`/collection/${collection.share_id}`} title={collection.title} />
+          <ShareButton shareId={collection.share_id} title={collection.title} />
         </div>
 
         <p className="mt-6 font-mono text-xs uppercase tracking-wider text-paper/40">
@@ -71,14 +72,18 @@ export default async function CollectionPage({ params }: { params: { shareId: st
         </p>
 
         {!parts.length ? (
-          <p className="mt-6 text-paper/50">This collection is empty. Someone forgot to add stuff!</p>
+          <div className="mt-8 flex flex-col items-center rounded-lg border border-line/15 bg-white/[0.02] py-12 text-center">
+            <span className="text-3xl">📭</span>
+            <p className="mt-3 text-paper/50">This collection is empty.</p>
+            <p className="mt-1 text-sm text-paper/35">Items will appear here once added.</p>
+          </div>
         ) : (
           <ol className="mt-4 divide-y divide-line/10 rounded-lg border border-line/15">
             {parts.map((part, index) => (
               <li key={part.id}>
                 {part.source ? (
                   <Link
-                    href={`/view/${part.source.share_id}`}
+                    href={hybridPath('/view', part.source.share_id, part.source.title)}
                     className="group flex items-center gap-4 px-4 py-4 transition-colors hover:bg-white/[0.03]"
                   >
                     <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-line/20 font-mono text-xs text-paper/50 group-hover:border-brass group-hover:text-brass">
@@ -99,7 +104,7 @@ export default async function CollectionPage({ params }: { params: { shareId: st
                     <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-line/10 font-mono text-xs">
                       {index + 1}
                     </span>
-                    <span className="text-sm italic">Poof — gone</span>
+                    <span className="text-sm italic">Item no longer available</span>
                   </div>
                 )}
               </li>

@@ -19,17 +19,22 @@ export async function GET() {
     const { count: imageCount } = await supabase.from('images').select('*', { count: 'exact', head: true });
     const { count: collectionCount } = await supabase.from('collections').select('*', { count: 'exact', head: true });
 
+    // Fetch categories for breakdown
+    const { data: categories } = await supabase.from('categories').select('id, name, slug');
+    const { data: filesWithCats } = await supabase.from('files').select('category_id');
+    const { data: imagesWithCats } = await supabase.from('images').select('category_id');
+
     const allEvents = events || [];
     const allReactions = reactions || [];
 
     // Fetch item titles for context
-    const { data: files } = await supabase.from('files').select('id, title');
-    const { data: images } = await supabase.from('images').select('id, title');
+    const { data: files } = await supabase.from('files').select('id, title, share_id, category_id');
+    const { data: images } = await supabase.from('images').select('id, title, share_id, category_id');
 
     // Build title lookup
-    const titleMap: Record<string, string> = {};
-    for (const f of files || []) titleMap[`file:${f.id}`] = f.title;
-    for (const i of images || []) titleMap[`image:${i.id}`] = i.title;
+    const titleMap: Record<string, { title: string; shareId: string; categoryId: string | null }> = {};
+    for (const f of files || []) titleMap[`file:${f.id}`] = { title: f.title, shareId: f.share_id, categoryId: f.category_id };
+    for (const i of images || []) titleMap[`image:${i.id}`] = { title: i.title, shareId: i.share_id, categoryId: i.category_id };
 
     // Current viewers: unique devices active in last 5 minutes
     const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
@@ -106,9 +111,28 @@ export async function GET() {
       else byItem[key].linkClicks++;
     }
     const topItems = Object.entries(byItem)
-      .map(([key, stats]) => ({ key, title: titleMap[key] || 'Untitled', ...stats }))
+      .map(([key, stats]) => {
+        const info = titleMap[key] || { title: 'Untitled', shareId: '', categoryId: null };
+        return { key, title: info.title, shareId: info.shareId, ...stats };
+      })
       .sort((a, b) => (b.views + b.linkClicks) - (a.views + a.linkClicks))
       .slice(0, 10);
+
+    // Trending: most views in last 7 days
+    const weeklyItemEvents = filterByTimeWindow(7 * 24 * 60);
+    const trendingByItem: Record<string, number> = {};
+    for (const e of weeklyItemEvents) {
+      const key = `${e.item_type}:${e.item_id}`;
+      trendingByItem[key] = (trendingByItem[key] || 0) + 1;
+    }
+    const trendingItems = Object.entries(trendingByItem)
+      .map(([key, count]) => {
+        const info = titleMap[key] || { title: 'Untitled', shareId: '', categoryId: null };
+        const [itemType, itemId] = key.split(':');
+        return { key, title: info.title, shareId: info.shareId, type: itemType, id: itemId, count };
+      })
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
 
     // Reaction breakdown
     const reactionCounts: Record<string, number> = {};
@@ -142,6 +166,41 @@ export async function GET() {
     const totalItems = (fileCount ?? 0) + (imageCount ?? 0);
     const avgViewsPerItem = totalItems > 0 ? Math.round(totalEvents / totalItems) : 0;
 
+    // Engagement rate: reactions per 100 views
+    const engagementRate = totalEvents > 0 ? Math.round((allReactions.length / totalEvents) * 100) : 0;
+
+    // Category breakdown
+    const categoryMap = new Map((categories || []).map((c) => [c.id, c]));
+    const catCounts: Record<string, { name: string; count: number }> = {};
+    for (const f of filesWithCats || []) {
+      if (f.category_id) {
+        const cat = categoryMap.get(f.category_id);
+        if (cat) {
+          catCounts[cat.id] = { name: cat.name, count: (catCounts[cat.id]?.count || 0) + 1 };
+        }
+      }
+    }
+    for (const i of imagesWithCats || []) {
+      if (i.category_id) {
+        const cat = categoryMap.get(i.category_id);
+        if (cat) {
+          catCounts[cat.id] = { name: cat.name, count: (catCounts[cat.id]?.count || 0) + 1 };
+        }
+      }
+    }
+    const categoryBreakdown = Object.entries(catCounts)
+      .map(([, v]) => v)
+      .sort((a, b) => b.count - a.count);
+
+    // Most active day of week
+    const dayOfWeekBuckets = new Array(7).fill(0);
+    for (const e of allEvents) {
+      const day = new Date(e.created_at).getDay();
+      dayOfWeekBuckets[day]++;
+    }
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const mostActiveDay = dayNames[dayOfWeekBuckets.indexOf(Math.max(...dayOfWeekBuckets))];
+
     return NextResponse.json({
       currentViewers,
       daily: { total: dailyEvents.length, uniqueDevices: dailyUniqueDevices },
@@ -156,18 +215,22 @@ export async function GET() {
       dailyChartData,
       hourlyChartData,
       topItems,
+      trendingItems,
       topReactions,
       contentCounts: {
         files: fileCount ?? 0,
         images: imageCount ?? 0,
         collections: collectionCount ?? 0,
       },
+      categoryBreakdown,
       funFacts: {
         peakHour,
         peakHourLabel: new Date(2000, 0, 1, peakHour).toLocaleTimeString('en-US', { hour: 'numeric', hour12: true, timeZone: 'Asia/Colombo' }),
         busiestDay: busiestDay ? { date: busiestDay[0], count: busiestDay[1] } : null,
         avgViewsPerItem,
         totalReactions: allReactions.length,
+        engagementRate,
+        mostActiveDay,
       },
     });
   } catch (err) {

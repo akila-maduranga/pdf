@@ -3,7 +3,7 @@ import './globals.css';
 
 export const metadata: Metadata = {
   title: 'Walkata — your cozy document corner',
-  description: 'Browse PDFs, images, and collections. Just vibes, no downloads.',
+  description: 'Browse PDFs, images, and collections. A pleasant place to view and share content.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

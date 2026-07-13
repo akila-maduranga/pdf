@@ -8,8 +8,7 @@ export default function Home() {
         <p className="font-mono text-xs uppercase tracking-[0.35em] text-brass">Your cozy little corner</p>
         <h1 className="mt-4 font-display text-5xl font-semibold sm:text-6xl">Walkata</h1>
         <p className="mx-auto mt-4 max-w-md text-paper/60">
-          A chill spot for documents, images, and collections — browse all you want,
-          no strings attached.
+          A welcoming place for documents, images, and collections — browse, enjoy, and share.
         </p>
         <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
           <Link
@@ -29,6 +28,12 @@ export default function Home() {
             className="rounded-lg border border-line/25 px-6 py-3 font-body text-sm text-paper/85 transition-colors hover:border-brass hover:text-brass"
           >
             Browse collections
+          </Link>
+          <Link
+            href="/stats"
+            className="rounded-lg border border-line/25 px-6 py-3 font-body text-sm text-paper/85 transition-colors hover:border-brass hover:text-brass"
+          >
+            View stats
           </Link>
         </div>
       </div>

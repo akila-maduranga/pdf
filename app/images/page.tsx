@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Suspense } from 'react';
 import { unstable_noStore as noStore } from 'next/cache';
 import { supabaseServer } from '@/lib/supabaseServer';
+import { hybridPath } from '@/lib/slugify';
 import SiteHeader from '@/components/SiteHeader';
 import CategoryFilter from '@/components/CategoryFilter';
 import ShareButton from '@/components/ShareButton';
@@ -35,13 +36,18 @@ export default async function ImagesPage({
       <main className="mx-auto min-h-screen max-w-5xl px-4 py-12 sm:px-8">
         <p className="font-mono text-xs uppercase tracking-[0.3em] text-brass/70">The visual vault</p>
         <h1 className="mt-2 font-display text-3xl font-semibold">Images</h1>
+        <p className="mt-2 text-sm text-paper/50">Explore our gallery of images.</p>
 
         <Suspense fallback={null}>
           <CategoryFilter categories={categories || []} basePath="/images" />
         </Suspense>
 
         {!images.length ? (
-          <p className="mt-10 text-paper/50">Nothing here yet.</p>
+          <div className="mt-16 flex flex-col items-center text-center">
+            <span className="text-4xl">🖼️</span>
+            <p className="mt-4 text-lg font-medium text-paper/70">No images yet</p>
+            <p className="mt-1 text-sm text-paper/40">Check back soon for new uploads.</p>
+          </div>
         ) : (
           <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
             {images.map((img: any) => (
@@ -49,7 +55,7 @@ export default async function ImagesPage({
                 key={img.id}
                 className="group relative overflow-hidden rounded-lg border border-line/15 bg-white/[0.02] transition-all hover:-translate-y-0.5 hover:border-brass/50 hover:shadow-[0_8px_30px_rgba(0,0,0,0.35)]"
               >
-                <Link href={`/view/${img.share_id}`} className="block">
+                <Link href={hybridPath('/view', img.share_id, img.title)} className="block">
                   <div className="aspect-square overflow-hidden bg-vellum">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
@@ -70,7 +76,7 @@ export default async function ImagesPage({
                   </div>
                 </Link>
                 <ShareButton
-                  path={`/view/${img.share_id}`}
+                  shareId={img.share_id}
                   title={img.title}
                   className="absolute right-2 top-2 h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
                 />

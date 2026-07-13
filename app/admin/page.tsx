@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { unstable_noStore as noStore } from 'next/cache';
 import { supabaseServer } from '@/lib/supabaseServer';
+import { hybridPath } from '@/lib/slugify';
 import LogoutButton from '@/components/LogoutButton';
 
 export const dynamic = 'force-dynamic';
@@ -14,7 +15,7 @@ export default async function AdminDashboard() {
   let totalViews = 0;
   let totalLinkClicks = 0;
   let totalReactions = 0;
-  let topItems: { id: string; type: string; title: string; views: number }[] = [];
+  let topItems: { id: string; type: string; title: string; views: number; shareId: string }[] = [];
   let loadError = false;
 
   try {
@@ -48,18 +49,19 @@ export default async function AdminDashboard() {
       const imageIds = topKeys.filter(([k]) => k.startsWith('image:')).map(([k]) => k.split(':')[1]);
       const [{ data: fRows }, { data: iRows }] = await Promise.all([
         fileIds.length
-          ? supabase.from('files').select('id, title').in('id', fileIds)
+          ? supabase.from('files').select('id, title, share_id').in('id', fileIds)
           : Promise.resolve({ data: [] as any[] }),
         imageIds.length
-          ? supabase.from('images').select('id, title').in('id', imageIds)
+          ? supabase.from('images').select('id, title, share_id').in('id', imageIds)
           : Promise.resolve({ data: [] as any[] }),
       ]);
-      const titleMap: Record<string, string> = {};
-      for (const r of fRows || []) titleMap[`file:${r.id}`] = r.title;
-      for (const r of iRows || []) titleMap[`image:${r.id}`] = r.title;
+      const titleMap: Record<string, { title: string; shareId: string }> = {};
+      for (const r of fRows || []) titleMap[`file:${r.id}`] = { title: r.title, shareId: r.share_id };
+      for (const r of iRows || []) titleMap[`image:${r.id}`] = { title: r.title, shareId: r.share_id };
       topItems = topKeys.map(([key, views]) => {
         const [type, id] = key.split(':');
-        return { id, type, title: titleMap[key] || '(untitled)', views };
+        const info = titleMap[key] || { title: '(untitled)', shareId: '' };
+        return { id, type, title: info.title, views, shareId: info.shareId };
       });
     }
   } catch {
@@ -103,21 +105,21 @@ export default async function AdminDashboard() {
       <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-5">
         <Stat label="Documents" value={fileCount} />
         <Stat label="Images" value={imageCount} />
-        <Stat label="Total eyeballs" value={totalViews} />
+        <Stat label="Total views" value={totalViews} />
         <Stat label="Shared links" value={totalLinkClicks} />
-        <Stat label="Vibes given" value={totalReactions} />
+        <Stat label="Reactions" value={totalReactions} />
       </div>
 
       <div className="mt-10">
         <h2 className="font-mono text-xs uppercase tracking-wider text-paper/40">Crowd favorites</h2>
         {!topItems.length ? (
-          <p className="mt-3 text-sm text-paper/40">No one&apos;s looked yet. Awkward.</p>
+          <p className="mt-3 text-sm text-paper/40">No views yet. Share some links to get started!</p>
         ) : (
           <div className="mt-3 divide-y divide-line/10 rounded border border-line/15">
             {topItems.map((item) => (
               <Link
                 key={`${item.type}-${item.id}`}
-                href={`/admin/files/${item.id}?type=${item.type}`}
+                href={hybridPath('/view', item.shareId, item.title)}
                 className="flex items-center justify-between px-4 py-3 text-sm hover:bg-white/[0.03]"
               >
                 <span className="text-paper/85">{item.title}</span>

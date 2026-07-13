@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { unstable_noStore as noStore } from 'next/cache';
 import { supabaseServer } from '@/lib/supabaseServer';
+import { hybridPath } from '@/lib/slugify';
 import { notFound } from 'next/navigation';
 import ItemCategoryEditor from '@/components/ItemCategoryEditor';
 
@@ -40,6 +41,8 @@ export default async function AdminItemDetail({
   const reactionCounts: Record<string, number> = {};
   for (const r of reactions || []) reactionCounts[r.emoji] = (reactionCounts[r.emoji] || 0) + 1;
 
+  const publicLink = hybridPath('/view', item.share_id, item.title);
+
   return (
     <main className="mx-auto min-h-screen max-w-3xl px-4 py-10 sm:px-8">
       <Link
@@ -52,24 +55,27 @@ export default async function AdminItemDetail({
       <h1 className="mt-3 font-display text-3xl font-semibold">{item.title}</h1>
       {item.description ? <p className="mt-2 text-paper/60">{item.description}</p> : null}
 
-      <p className="mt-3 font-mono text-xs text-paper/40">
-        Share link: <span className="break-all text-brass">/view/{item.share_id}</span>
-      </p>
+      <div className="mt-4">
+        <p className="text-xs text-paper/40">Public link:</p>
+        <Link href={publicLink} target="_blank" className="break-all font-mono text-xs text-brass hover:underline">
+          {publicLink}
+        </Link>
+      </div>
 
       <div className="mt-6">
         <ItemCategoryEditor itemId={item.id} type={type} initialCategoryId={item.category_id} />
       </div>
 
       <div className="mt-8 grid grid-cols-3 gap-4">
-        <Stat label="Total eyeballs" value={pageViews + linkClicks} />
-        <Stat label="Gallery peeks" value={pageViews} />
-        <Stat label="Shared links" value={linkClicks} />
+        <Stat label="Total views" value={pageViews + linkClicks} />
+        <Stat label="Gallery views" value={pageViews} />
+        <Stat label="Direct links" value={linkClicks} />
       </div>
 
       <div className="mt-8">
-        <h2 className="font-mono text-xs uppercase tracking-wider text-paper/40">Vibes</h2>
+        <h2 className="font-mono text-xs uppercase tracking-wider text-paper/40">Reactions</h2>
         {!Object.keys(reactionCounts).length ? (
-          <p className="mt-3 text-sm text-paper/40">Crickets so far.</p>
+          <p className="mt-3 text-sm text-paper/40">No reactions yet.</p>
         ) : (
           <div className="mt-3 flex flex-wrap gap-3">
             {Object.entries(reactionCounts).map(([emoji, count]) => (
@@ -82,14 +88,14 @@ export default async function AdminItemDetail({
       </div>
 
       <div className="mt-8">
-        <h2 className="font-mono text-xs uppercase tracking-wider text-paper/40">Recent drops</h2>
+        <h2 className="font-mono text-xs uppercase tracking-wider text-paper/40">Recent activity</h2>
         {!events?.length ? (
-          <p className="mt-3 text-sm text-paper/40">Tumbleweeds...</p>
+          <p className="mt-3 text-sm text-paper/40">No activity recorded yet.</p>
         ) : (
           <div className="mt-3 divide-y divide-line/10 rounded border border-line/15">
             {events.slice(0, 25).map((e, i) => (
               <div key={i} className="flex items-center justify-between px-4 py-2 text-xs">
-                <span className="text-paper/70">{e.event_type === 'view' ? 'Gallery view' : 'Link click'}</span>
+                <span className="text-paper/70">{e.event_type === 'view' ? 'Gallery view' : 'Direct link'}</span>
                 <span className="font-mono text-paper/40">{new Date(e.created_at).toLocaleString('en-US', { timeZone: 'Asia/Colombo' })}</span>
               </div>
             ))}

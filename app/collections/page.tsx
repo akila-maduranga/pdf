@@ -30,14 +30,18 @@ export default async function CollectionsPage() {
     <>
       <SiteHeader />
       <main className="mx-auto min-h-screen max-w-5xl px-4 py-12 sm:px-8">
-        <p className="font-mono text-xs uppercase tracking-[0.3em] text-brass/70">Multi-part stories</p>
+        <p className="font-mono text-xs uppercase tracking-[0.3em] text-brass/70">Curated series</p>
         <h1 className="mt-2 font-display text-3xl font-semibold">Collections</h1>
         <p className="mt-2 max-w-md text-paper/55">
-          Series, chapters, and issues — grouped in order, one story at a time.
+          Grouped stories, chapters, and series — organized for easy browsing.
         </p>
 
         {!collections?.length ? (
-          <p className="mt-10 text-paper/50">No collections yet.</p>
+          <div className="mt-16 flex flex-col items-center text-center">
+            <span className="text-4xl">📚</span>
+            <p className="mt-4 text-lg font-medium text-paper/70">No collections yet</p>
+            <p className="mt-1 text-sm text-paper/40">Collections will appear here once created.</p>
+          </div>
         ) : (
           <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2">
             {collections.map((c: any) => (
@@ -62,7 +66,7 @@ export default async function CollectionsPage() {
                   </p>
                 </Link>
                 <ShareButton
-                  path={`/collection/${c.share_id}`}
+                  shareId={c.share_id}
                   title={c.title}
                   className="absolute right-4 top-4 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
                 />
