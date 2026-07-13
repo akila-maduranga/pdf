@@ -30,7 +30,7 @@ export default function UploadFileForm({ kind }: Props) {
       router.refresh();
     } else {
       const data = await res.json().catch(() => ({}));
-      setError(data.error || 'Upload failed');
+      setError(data.error || 'Nope, didn\'t work');
     }
   }
 
@@ -41,7 +41,7 @@ export default function UploadFileForm({ kind }: Props) {
       className="rounded border border-line/15 bg-white/[0.02] p-5"
     >
       <p className="font-mono text-xs uppercase tracking-wider text-brass">
-        Add {kind === 'file' ? 'document' : 'image'}
+        Drop {kind === 'file' ? 'a document' : 'an image'}
       </p>
 
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -88,7 +88,7 @@ export default function UploadFileForm({ kind }: Props) {
         disabled={loading}
         className="mt-4 rounded bg-brass px-5 py-2 text-sm font-medium text-ink hover:opacity-90 disabled:opacity-40"
       >
-        {loading ? 'Uploading…' : 'Upload'}
+        {loading ? 'Sending it up...' : 'Upload'}
       </button>
     </form>
   );

@@ -18,12 +18,11 @@ export default async function AdminCollectionsPage() {
   return (
     <main className="mx-auto min-h-screen max-w-4xl px-4 py-10 sm:px-8">
       <Link href="/admin" className="font-mono text-xs uppercase tracking-wider text-paper/40 hover:text-brass">
-        ← Dashboard
+        ← Control room
       </Link>
-      <h1 className="mt-3 font-display text-3xl font-semibold">Collections</h1>
+      <h1 className="mt-3 font-display text-3xl font-semibold">Story bundles</h1>
       <p className="mt-2 text-sm text-paper/50">
-        Group several documents or images together as parts of one story — chapters, issues, a
-        photo series — with a single shareable link.
+        Group docs and images into chapters, issues, or photo series — one link to share them all.
       </p>
 
       <div className="mt-6">
@@ -32,7 +31,7 @@ export default async function AdminCollectionsPage() {
 
       <div className="mt-8">
         {!collections?.length ? (
-          <p className="text-sm text-paper/40">No collections yet.</p>
+          <p className="text-sm text-paper/40">No bundles yet. Start one!</p>
         ) : (
           <div className="divide-y divide-line/10 rounded border border-line/15">
             {collections.map((c: any) => (

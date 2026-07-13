@@ -26,13 +26,13 @@ export default function CreateCollectionForm() {
     if (res.ok && data.collection) {
       router.push(`/admin/collections/${data.collection.id}`);
     } else {
-      setError(data.error || 'Could not create collection');
+      setError(data.error || 'Nope, didn\'t work');
     }
   }
 
   return (
     <form onSubmit={submit} className="rounded border border-line/15 bg-white/[0.02] p-5">
-      <p className="font-mono text-xs uppercase tracking-wider text-brass">New collection</p>
+      <p className="font-mono text-xs uppercase tracking-wider text-brass">Start a new bundle</p>
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <input
           value={title}
@@ -56,7 +56,7 @@ export default function CreateCollectionForm() {
         disabled={loading || !title.trim()}
         className="mt-4 rounded bg-brass px-5 py-2 text-sm font-medium text-ink hover:opacity-90 disabled:opacity-40"
       >
-        {loading ? 'Creating…' : 'Create collection'}
+        {loading ? 'Making it...' : 'Create bundle'}
       </button>
     </form>
   );

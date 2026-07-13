@@ -53,12 +53,11 @@ export default function AdminCategoriesPage() {
   return (
     <main className="mx-auto min-h-screen max-w-2xl px-4 py-10 sm:px-8">
       <Link href="/admin" className="font-mono text-xs uppercase tracking-wider text-paper/40 hover:text-brass">
-        ← Dashboard
+        ← Control room
       </Link>
-      <h1 className="mt-3 font-display text-3xl font-semibold">Categories</h1>
+      <h1 className="mt-3 font-display text-3xl font-semibold">Label maker</h1>
       <p className="mt-2 text-sm text-paper/50">
-        Categories can be applied to documents, images, and collections to help visitors browse by
-        topic.
+        Tags to help visitors browse by topic.
       </p>
 
       <form onSubmit={create} className="mt-6 flex gap-2 rounded border border-line/15 bg-white/[0.02] p-4">
@@ -80,9 +79,9 @@ export default function AdminCategoriesPage() {
 
       <div className="mt-6">
         {loading ? (
-          <p className="text-sm text-paper/40">Loading…</p>
+          <p className="text-sm text-paper/40">Hang on...</p>
         ) : !categories.length ? (
-          <p className="text-sm text-paper/40">No categories yet.</p>
+          <p className="text-sm text-paper/40">No labels yet.</p>
         ) : (
           <div className="divide-y divide-line/10 rounded border border-line/15">
             {categories.map((c) => (

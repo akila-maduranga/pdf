@@ -18,9 +18,9 @@ export default async function AdminImagesPage() {
   return (
     <main className="mx-auto min-h-screen max-w-4xl px-4 py-10 sm:px-8">
       <Link href="/admin" className="font-mono text-xs uppercase tracking-wider text-paper/40 hover:text-brass">
-        ← Dashboard
+        ← Control room
       </Link>
-      <h1 className="mt-3 font-display text-3xl font-semibold">Images</h1>
+      <h1 className="mt-3 font-display text-3xl font-semibold">The visual vault</h1>
 
       <div className="mt-6">
         <UploadFileForm kind="image" />
@@ -28,7 +28,7 @@ export default async function AdminImagesPage() {
 
       <div className="mt-8">
         {!images?.length ? (
-          <p className="text-sm text-paper/40">No images uploaded yet.</p>
+          <p className="text-sm text-paper/40">No eye candy yet. Fix that!</p>
         ) : (
           <div className="divide-y divide-line/10 rounded border border-line/15">
             {images.map((img: any) => (

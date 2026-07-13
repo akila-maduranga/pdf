@@ -18,9 +18,9 @@ export default async function AdminFilesPage() {
   return (
     <main className="mx-auto min-h-screen max-w-4xl px-4 py-10 sm:px-8">
       <Link href="/admin" className="font-mono text-xs uppercase tracking-wider text-paper/40 hover:text-brass">
-        ← Dashboard
+        ← Control room
       </Link>
-      <h1 className="mt-3 font-display text-3xl font-semibold">Documents</h1>
+      <h1 className="mt-3 font-display text-3xl font-semibold">The paper stash</h1>
 
       <div className="mt-6">
         <UploadFileForm kind="file" />
@@ -28,7 +28,7 @@ export default async function AdminFilesPage() {
 
       <div className="mt-8">
         {!files?.length ? (
-          <p className="text-sm text-paper/40">No documents uploaded yet.</p>
+          <p className="text-sm text-paper/40">Shelf&apos;s empty. Upload something!</p>
         ) : (
           <div className="divide-y divide-line/10 rounded border border-line/15">
             {files.map((f: any) => (

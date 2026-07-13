@@ -25,7 +25,7 @@ export default function AdminItemRow({ id, type, title, shareId, categoryName }:
   }
 
   async function remove() {
-    if (!confirm(`Delete "${title}"? This can't be undone.`)) return;
+    if (!confirm(`Toss "${title}" into the void? No take-backs.`)) return;
     setDeleting(true);
     await fetch(`/api/admin/file/${id}?type=${type}`, { method: 'DELETE' });
     router.refresh();
@@ -46,20 +46,20 @@ export default function AdminItemRow({ id, type, title, shareId, categoryName }:
           onClick={copyLink}
           className="rounded border border-line/20 px-2.5 py-1 text-xs text-paper/60 hover:border-brass hover:text-brass"
         >
-          {copied ? 'Copied' : 'Copy link'}
+          {copied ? 'Snagged!' : 'Grab link'}
         </button>
         <Link
           href={`/admin/files/${id}?type=${type}`}
           className="rounded border border-line/20 px-2.5 py-1 text-xs text-paper/60 hover:border-brass hover:text-brass"
         >
-          Stats
+          Scoop
         </Link>
         <button
           onClick={remove}
           disabled={deleting}
           className="rounded border border-line/20 px-2.5 py-1 text-xs text-paper/60 hover:border-rust hover:text-rust disabled:opacity-40"
         >
-          {deleting ? '…' : 'Delete'}
+          {deleting ? '…' : 'Toss it'}
         </button>
       </div>
     </div>

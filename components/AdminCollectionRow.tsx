@@ -24,7 +24,7 @@ export default function AdminCollectionRow({ id, title, shareId, partCount }: Pr
   }
 
   async function remove() {
-    if (!confirm(`Delete collection "${title}"? Its parts stay, only the grouping is removed.`)) return;
+    if (!confirm(`Unbundle "${title}"? The items inside will be fine.`)) return;
     setDeleting(true);
     await fetch(`/api/admin/collections/${id}`, { method: 'DELETE' });
     router.refresh();
@@ -43,20 +43,20 @@ export default function AdminCollectionRow({ id, title, shareId, partCount }: Pr
           onClick={copyLink}
           className="rounded border border-line/20 px-2.5 py-1 text-xs text-paper/60 hover:border-brass hover:text-brass"
         >
-          {copied ? 'Copied' : 'Copy link'}
+          {copied ? 'Snagged!' : 'Grab link'}
         </button>
         <Link
           href={`/admin/collections/${id}`}
           className="rounded border border-line/20 px-2.5 py-1 text-xs text-paper/60 hover:border-brass hover:text-brass"
         >
-          Edit
+          Tweak
         </Link>
         <button
           onClick={remove}
           disabled={deleting}
           className="rounded border border-line/20 px-2.5 py-1 text-xs text-paper/60 hover:border-rust hover:text-rust disabled:opacity-40"
         >
-          {deleting ? '…' : 'Delete'}
+          {deleting ? '…' : 'Toss it'}
         </button>
       </div>
     </div>
