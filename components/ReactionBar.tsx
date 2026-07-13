@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { getDeviceId } from '@/lib/deviceId';
 
-const EMOJIS = ['😍', '🔥', '😋', '😏', '🥵', '💜'];
+const EMOJIS = ['👍', '❤️', '😂', '😮', '😢', '🔥', '🎉', '👀'];
 
 type Props = {
   itemType: 'file' | 'image';
@@ -50,14 +50,14 @@ export default function ReactionBar({ itemType, itemId }: Props) {
           key={emoji}
           onClick={() => react(emoji)}
           disabled={loading}
-          className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors ${
+          className={`inline-flex items-center gap-1 rounded-lg px-3 py-2 text-base transition-all active:scale-90 ${
             mine === emoji
-              ? 'border-rose-gold bg-rose-gold/15 text-rose-gold'
-              : 'border-velvet-border/30 bg-velvet-surface/30 text-velvet-text/70 hover:border-velvet-border/50 hover:text-velvet-text'
+              ? 'bg-rose text-white shadow-lg shadow-rose/30 scale-110'
+              : 'bg-surface border border-border text-text-muted hover:border-rose/30 hover:text-rose-light'
           }`}
         >
           <span>{emoji}</span>
-          {counts[emoji] ? <span className="font-mono text-xs">{counts[emoji]}</span> : null}
+          {counts[emoji] ? <span className="font-body text-xs font-semibold">{counts[emoji]}</span> : null}
         </button>
       ))}
     </div>

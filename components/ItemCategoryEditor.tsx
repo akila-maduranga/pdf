@@ -39,9 +39,9 @@ export default function ItemCategoryEditor({
       <button
         onClick={save}
         disabled={saving}
-        className="rounded-lg border border-velvet-border/30 px-3 py-2.5 text-xs text-velvet-text/60 hover:border-rose-gold hover:text-rose-gold disabled:opacity-40"
+        className="rounded-lg border border-border px-3 py-2 text-xs text-text-muted hover:text-gold hover:border-gold/30 transition-colors btn-press disabled:opacity-40"
       >
-        {saved ? 'Saved!' : saving ? 'Saving...' : 'Save'}
+        {saved ? 'Saved' : saving ? 'Saving…' : 'Save'}
       </button>
     </div>
   );

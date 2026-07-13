@@ -8,40 +8,26 @@ type Props = {
 
 export default function PdfViewer({ shareId }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const docRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const touchStartX = useRef<number | null>(null);
-  const touchStartY = useRef<number | null>(null);
-  const lastTap = useRef<number>(0);
+  const docRef = useRef<any>(null);
   const [pageNum, setPageNum] = useState(1);
   const [numPages, setNumPages] = useState(0);
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
-  const [scale, setScale] = useState(1.2);
-  const [containerWidth, setContainerWidth] = useState(0);
-  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [scale, setScale] = useState(1.0);
+  const [showSwipeHint, setShowSwipeHint] = useState(false);
+  const touchStartX = useRef<number | null>(null);
+  const touchStartY = useRef<number | null>(null);
+  const isSwiping = useRef(false);
 
-  useEffect(() => {
-    function measure() {
-      if (containerRef.current) {
-        setContainerWidth(containerRef.current.clientWidth);
-      }
-    }
-    measure();
-    window.addEventListener('resize', measure);
-    return () => window.removeEventListener('resize', measure);
-  }, []);
-
-  useEffect(() => {
-    const handleFsChange = () => setIsFullscreen(!!document.fullscreenElement);
-    document.addEventListener('fullscreenchange', handleFsChange);
-    return () => document.removeEventListener('fullscreenchange', handleFsChange);
-  }, []);
-
-  useEffect(() => {
-    if (status !== 'ready' || !docRef.current || !containerWidth || containerWidth < 400) return;
-    const maxScale = containerWidth < 500 ? 1.0 : 1.2;
-    if (scale > maxScale) setScale(maxScale);
-  }, [containerWidth, status]);
+  // Auto-fit to container width
+  const fitToWidth = useCallback(async () => {
+    if (!docRef.current || !containerRef.current) return;
+    const page = await docRef.current.getPage(pageNum);
+    const containerWidth = containerRef.current.clientWidth - 16; // padding
+    const defaultViewport = page.getViewport({ scale: 1 });
+    const newScale = containerWidth / defaultViewport.width;
+    setScale(Math.min(Math.max(newScale, 0.5), 3));
+  }, [pageNum]);
 
   useEffect(() => {
     let cancelled = false;
@@ -72,6 +58,27 @@ export default function PdfViewer({ shareId }: Props) {
     };
   }, [shareId]);
 
+  // Re-fit on page change and initial load
+  useEffect(() => {
+    if (status === 'ready') {
+      fitToWidth();
+      // Show swipe hint on mobile for first load
+      if (typeof window !== 'undefined' && 'ontouchstart' in window && pageNum === 1) {
+        setShowSwipeHint(true);
+        const timer = setTimeout(() => setShowSwipeHint(false), 4000);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [status, pageNum, fitToWidth]);
+
+  // Re-fit on window resize
+  useEffect(() => {
+    if (status !== 'ready') return;
+    const handleResize = () => fitToWidth();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [status, fitToWidth]);
+
   useEffect(() => {
     async function renderPage() {
       if (!docRef.current || !canvasRef.current) return;
@@ -87,166 +94,155 @@ export default function PdfViewer({ shareId }: Props) {
     if (status === 'ready') renderPage();
   }, [pageNum, scale, status]);
 
-  const goToPrev = useCallback(() => setPageNum((p) => Math.max(1, p - 1)), []);
-  const goToNext = useCallback(() => setPageNum((p) => Math.min(numPages, p + 1)), [numPages]);
-
-  const toggleFullscreen = useCallback(() => {
-    if (!containerRef.current) return;
-    if (!document.fullscreenElement) {
-      containerRef.current.requestFullscreen().catch(() => {});
-    } else {
-      document.exitFullscreen().catch(() => {});
-    }
-  }, []);
-
+  // Touch handlers for swipe navigation
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     touchStartX.current = e.touches[0].clientX;
     touchStartY.current = e.touches[0].clientY;
+    isSwiping.current = false;
   }, []);
 
-  const handleTouchEnd = useCallback(
-    (e: React.TouchEvent) => {
-      if (touchStartX.current === null || touchStartY.current === null) return;
-      const dx = e.changedTouches[0].clientX - touchStartX.current;
-      const dy = e.changedTouches[0].clientY - touchStartY.current;
-      if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5) {
-        if (dx < 0) goToNext();
-        else goToPrev();
-      }
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    if (touchStartX.current === null || touchStartY.current === null) return;
+    const dx = e.touches[0].clientX - touchStartX.current;
+    const dy = e.touches[0].clientY - touchStartY.current;
+    // Only count as swipe if horizontal movement is dominant
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 15) {
+      isSwiping.current = true;
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    if (touchStartX.current === null || !isSwiping.current) return;
+    touchStartX.current = null;
+    touchStartY.current = null;
+  }, []);
+
+  // Track swipe direction
+  const handleTouchEndSwipe = useCallback((e: React.TouchEvent) => {
+    if (!isSwiping.current) {
       touchStartX.current = null;
       touchStartY.current = null;
-    },
-    [goToNext, goToPrev]
-  );
+      return;
+    }
+    const endX = e.changedTouches[0].clientX;
+    const startX = touchStartX.current || endX;
+    const diff = endX - startX;
 
-  const handleDoubleTap = useCallback(
-    (e: React.TouchEvent) => {
-      const now = Date.now();
-      if (now - lastTap.current < 300) {
-        toggleFullscreen();
+    if (Math.abs(diff) > 50) {
+      if (diff < 0) {
+        // Swipe left → next page
+        setPageNum((p) => Math.min(numPages, p + 1));
+      } else {
+        // Swipe right → prev page
+        setPageNum((p) => Math.max(1, p - 1));
       }
-      lastTap.current = now;
-    },
-    [toggleFullscreen]
-  );
+    }
+    touchStartX.current = null;
+    touchStartY.current = null;
+    isSwiping.current = false;
+  }, [numPages]);
 
   if (status === 'loading') {
     return (
-      <div className="flex h-64 flex-col items-center justify-center gap-3 text-velvet-text/50">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-rose-gold/30 border-t-rose-gold" />
-        <span className="text-sm">Loading your story...</span>
+      <div className="flex h-64 flex-col items-center justify-center gap-3 text-text-muted">
+        <div className="h-10 w-10 animate-spin-slow rounded-full border-4 border-rose/20 border-t-rose" />
+        <p className="font-body text-sm">Loading doc...</p>
       </div>
     );
   }
   if (status === 'error') {
     return (
-      <div className="flex h-64 flex-col items-center justify-center gap-2 text-velvet-text/50">
-        <span className="text-3xl">💔</span>
-        <span className="text-sm">This story couldn&apos;t be loaded. Please try again.</span>
+      <div className="flex h-64 flex-col items-center justify-center gap-3 text-text-muted">
+        <span className="text-4xl">😵</span>
+        <p className="font-body text-sm">Couldn&apos;t load this one. The link might be broken!</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col items-center gap-3" ref={containerRef}>
-      {/* PDF Canvas with swipe + double-tap support */}
+    <div className="flex flex-col items-center gap-4">
+      {/* PDF Canvas Container - mobile optimized */}
       <div
-        className="no-select w-full overflow-auto rounded-xl border border-velvet-border/30 bg-midnight/50 p-1 sm:p-3"
+        ref={containerRef}
+        className="pdf-mobile-container relative w-full overflow-hidden rounded-xl border border-border bg-surface p-2 shadow-lg sm:p-4"
         onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
-        onTouchMove={handleDoubleTap}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEndSwipe}
       >
-        <canvas ref={canvasRef} className="mx-auto block max-w-full shadow-lg" />
-      </div>
+        <canvas ref={canvasRef} className="mx-auto block max-w-full" />
 
-      {/* Mobile-optimized bottom control bar */}
-      <div className="sticky bottom-3 z-10 w-full max-w-md safe-bottom">
-        <div className="flex items-center justify-between rounded-2xl border border-velvet-border/30 bg-velvet-bg/95 px-3 py-2.5 shadow-xl backdrop-blur-sm sm:static sm:bottom-auto sm:max-w-none sm:rounded-xl sm:bg-velvet-surface/50 sm:px-4 sm:shadow-none sm:backdrop-blur-none">
-          <button
-            onClick={goToPrev}
-            disabled={pageNum <= 1}
-            className="flex h-11 w-11 items-center justify-center rounded-xl text-velvet-text/80 transition-colors hover:bg-rose-gold/15 hover:text-rose-gold disabled:opacity-25 sm:h-auto sm:w-auto sm:rounded-lg sm:border sm:border-velvet-border/30 sm:px-4 sm:py-2"
-            aria-label="Previous page"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:hidden">
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
-            <span className="hidden text-sm sm:inline">← Prev</span>
-          </button>
-
-          <div className="flex flex-col items-center gap-1">
-            <span className="font-mono text-sm font-medium text-velvet-text/70">
-              {pageNum} <span className="text-velvet-text/30">/</span> {numPages}
-            </span>
-            <div className="h-1 w-20 rounded-full bg-velvet-border/20 sm:hidden">
-              <div
-                className="h-full rounded-full bg-rose-gold/60 transition-all duration-200"
-                style={{ width: `${(pageNum / numPages) * 100}%` }}
-              />
+        {/* Swipe hint overlay for mobile */}
+        {showSwipeHint && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/10 pointer-events-none">
+            <div className="flex items-center gap-2 rounded-lg bg-surface-2/90 backdrop-blur px-4 py-2 shadow-lg">
+              <span className="swipe-hint-anim text-2xl">👈</span>
+              <span className="font-body text-sm font-medium text-text">Swipe to flip pages</span>
+              <span className="swipe-hint-anim text-2xl" style={{ animationDelay: '0.2s' }}>👉</span>
             </div>
           </div>
+        )}
+      </div>
 
+      {/* Controls */}
+      <div className="flex flex-col items-center gap-3 w-full">
+        {/* Page navigation */}
+        <div className="flex items-center justify-center gap-2">
           <button
-            onClick={goToNext}
-            disabled={pageNum >= numPages}
-            className="flex h-11 w-11 items-center justify-center rounded-xl text-velvet-text/80 transition-colors hover:bg-rose-gold/15 hover:text-rose-gold disabled:opacity-25 sm:h-auto sm:w-auto sm:rounded-lg sm:border sm:border-velvet-border/30 sm:px-4 sm:py-2"
-            aria-label="Next page"
+            onClick={() => setPageNum((p) => Math.max(1, p - 1))}
+            disabled={pageNum <= 1}
+            className="btn-press flex h-12 w-12 items-center justify-center rounded-xl bg-rose text-white text-lg font-bold shadow-lg shadow-rose/20 active:scale-90 disabled:opacity-30 disabled:shadow-none transition-all sm:h-10 sm:w-10 sm:text-base"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:hidden">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-            <span className="hidden text-sm sm:inline">Next →</span>
+            ←
+          </button>
+          <div className="flex h-12 items-center rounded-xl bg-surface px-4 sm:h-10">
+            <span className="font-mono text-sm font-medium text-text-muted">
+              {pageNum}<span className="text-text-dim"> / {numPages}</span>
+            </span>
+          </div>
+          <button
+            onClick={() => setPageNum((p) => Math.min(numPages, p + 1))}
+            disabled={pageNum >= numPages}
+            className="btn-press flex h-12 w-12 items-center justify-center rounded-xl bg-rose text-white text-lg font-bold shadow-lg shadow-rose/20 active:scale-90 disabled:opacity-30 disabled:shadow-none transition-all sm:h-10 sm:w-10 sm:text-base"
+          >
+            →
           </button>
         </div>
 
-        {/* Zoom + fullscreen controls */}
-        <div className="mt-2 flex items-center justify-center gap-1 sm:mt-2">
+        {/* Zoom controls */}
+        <div className="flex items-center gap-2">
           <button
-            onClick={() => setScale((s) => Math.max(0.5, +(s - 0.2).toFixed(1)))}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-velvet-text/60 transition-colors hover:bg-rose-gold/10 hover:text-rose-gold"
-            aria-label="Zoom out"
+            onClick={() => setScale((s) => Math.max(0.4, s - 0.15))}
+            className="btn-press flex h-10 w-10 items-center justify-center rounded-xl border border-border text-text-muted text-xl font-bold active:scale-90 transition-all hover:bg-surface-2 hover:text-rose-light sm:h-8 sm:w-8 sm:text-base"
           >
             −
           </button>
-          <span className="w-12 text-center font-mono text-[11px] text-velvet-text/40">
-            {Math.round(scale * 100)}%
-          </span>
           <button
-            onClick={() => setScale((s) => Math.min(2.4, +(s + 0.2).toFixed(1)))}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-velvet-text/60 transition-colors hover:bg-rose-gold/10 hover:text-rose-gold"
-            aria-label="Zoom in"
-          >
-            +
-          </button>
-          <button
-            onClick={() => setScale(containerWidth < 500 ? 0.8 : 1.2)}
-            className="rounded-lg px-2 py-1 font-mono text-[10px] uppercase tracking-wider text-velvet-text/40 transition-colors hover:bg-rose-gold/10 hover:text-rose-gold"
+            onClick={fitToWidth}
+            className="btn-press h-10 rounded-xl border border-border px-3 font-mono text-xs font-medium text-text-muted active:scale-90 transition-all hover:bg-surface-2 hover:text-rose-light sm:h-8"
           >
             Fit
           </button>
-          <div className="mx-1 h-4 w-px bg-velvet-border/20" />
           <button
-            onClick={toggleFullscreen}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-velvet-text/60 transition-colors hover:bg-rose-gold/10 hover:text-rose-gold"
-            aria-label={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
-            title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+            onClick={() => setScale((s) => Math.min(3, s + 0.15))}
+            className="btn-press flex h-10 w-10 items-center justify-center rounded-xl border border-border text-text-muted text-xl font-bold active:scale-90 transition-all hover:bg-surface-2 hover:text-rose-light sm:h-8 sm:w-8 sm:text-base"
           >
-            {isFullscreen ? (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="4 14 10 14 10 20" />
-                <polyline points="20 10 14 10 14 4" />
-                <line x1="14" y1="10" x2="21" y2="3" />
-                <line x1="3" y1="21" x2="10" y2="14" />
-              </svg>
-            ) : (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="15 3 21 3 21 9" />
-                <polyline points="9 21 3 21 3 15" />
-                <line x1="21" y1="3" x2="14" y2="10" />
-                <line x1="3" y1="21" x2="10" y2="14" />
-              </svg>
-            )}
+            +
           </button>
+          <span className="ml-1 font-mono text-xs text-text-dim">
+            {Math.round(scale * 100)}%
+          </span>
+        </div>
+
+        {/* Page slider for mobile */}
+        <div className="w-full max-w-xs sm:hidden">
+          <input
+            type="range"
+            min={1}
+            max={numPages}
+            value={pageNum}
+            onChange={(e) => setPageNum(Number(e.target.value))}
+            className="w-full h-2"
+          />
         </div>
       </div>
     </div>

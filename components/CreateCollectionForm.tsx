@@ -26,37 +26,37 @@ export default function CreateCollectionForm() {
     if (res.ok && data.collection) {
       router.push(`/admin/collections/${data.collection.id}`);
     } else {
-      setError(data.error || 'Failed to create');
+      setError(data.error || 'Could not create collection');
     }
   }
 
   return (
-    <form onSubmit={submit} className="rounded-xl border border-velvet-border/30 bg-velvet-surface/30 p-5">
-      <p className="font-mono text-xs uppercase tracking-wider text-rose-gold">Create a new collection</p>
+    <form onSubmit={submit} className="rounded-xl bg-surface border border-border p-5">
+      <p className="font-mono text-xs uppercase tracking-wider text-gold">New collection</p>
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
-          placeholder="Title (e.g. 'Chapters 1-5')"
-          className="rounded-lg border border-velvet-border/30 bg-midnight/30 px-3 py-2.5 text-sm text-velvet-text outline-none focus:border-rose-gold sm:col-span-2"
+          placeholder="Title (e.g. 'The Long Road, Chapters 1–5')"
+          className="rounded-lg bg-surface-2 border border-border px-3 py-2 text-sm text-text placeholder:text-text-dim outline-none focus:border-rose/40 focus:ring-1 focus:ring-rose/20 transition-all sm:col-span-2"
         />
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Description (optional)"
           rows={2}
-          className="rounded-lg border border-velvet-border/30 bg-midnight/30 px-3 py-2.5 text-sm text-velvet-text outline-none focus:border-rose-gold sm:col-span-2"
+          className="rounded-lg bg-surface-2 border border-border px-3 py-2 text-sm text-text placeholder:text-text-dim outline-none focus:border-rose/40 focus:ring-1 focus:ring-rose/20 transition-all sm:col-span-2 resize-none"
         />
         <CategorySelect value={categoryId} onChange={setCategoryId} />
       </div>
-      {error ? <p className="mt-3 text-sm text-wine">{error}</p> : null}
+      {error ? <p className="mt-3 text-sm text-danger">{error}</p> : null}
       <button
         type="submit"
         disabled={loading || !title.trim()}
-        className="mt-4 rounded-lg bg-rose-gold px-5 py-2.5 text-sm font-medium text-velvet-bg hover:bg-rose-gold/90 disabled:opacity-40"
+        className="mt-4 rounded-lg bg-gold px-5 py-2 text-sm font-semibold text-bg hover:bg-gold-light disabled:opacity-40 transition-colors btn-press"
       >
-        {loading ? 'Creating...' : 'Create collection'}
+        {loading ? 'Creating…' : 'Create collection'}
       </button>
     </form>
   );

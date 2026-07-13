@@ -3,7 +3,7 @@
 import { useState } from 'react';
 
 type Props = {
-  path: string;
+  path: string; // e.g. `/view/abc123`
   title: string;
   variant?: 'icon' | 'button';
   className?: string;
@@ -23,7 +23,8 @@ export default function ShareButton({ path, title, variant = 'icon', className =
         await (navigator as any).share({ title, url });
         return;
       } catch {
-        // user cancelled the native share sheet
+        // user cancelled the native share sheet, or it isn't actually
+        // supported — fall through to clipboard copy
       }
     }
 
@@ -32,7 +33,7 @@ export default function ShareButton({ path, title, variant = 'icon', className =
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch {
-      // clipboard blocked
+      // clipboard blocked — ignore, nothing more we can do
     }
   }
 
@@ -41,8 +42,8 @@ export default function ShareButton({ path, title, variant = 'icon', className =
       <button
         onClick={share}
         aria-label="Share"
-        title={copied ? 'Link copied!' : 'Share'}
-        className={`flex h-8 w-8 items-center justify-center rounded-full border border-velvet-border/30 bg-velvet-bg/60 text-velvet-text/75 backdrop-blur transition-colors hover:border-rose-gold hover:text-rose-gold ${className}`}
+        title={copied ? 'Copied!' : 'Share'}
+        className={`flex h-8 w-8 items-center justify-center rounded-full bg-rose/80 text-white backdrop-blur transition-all hover:bg-rose hover:scale-110 active:scale-90 ${className}`}
       >
         {copied ? <CheckIcon /> : <ShareIcon />}
       </button>
@@ -52,7 +53,7 @@ export default function ShareButton({ path, title, variant = 'icon', className =
   return (
     <button
       onClick={share}
-      className={`flex items-center gap-1.5 rounded border border-velvet-border/30 px-3 py-1.5 text-xs text-velvet-text/70 transition-colors hover:border-rose-gold hover:text-rose-gold ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-xl bg-rose px-4 py-2 text-xs font-semibold text-white shadow-lg shadow-rose/20 transition-all active:scale-95 btn-press ${className}`}
     >
       {copied ? <CheckIcon /> : <ShareIcon />}
       {copied ? 'Copied!' : 'Share'}
@@ -62,7 +63,7 @@ export default function ShareButton({ path, title, variant = 'icon', className =
 
 function ShareIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
       <circle cx="18" cy="5" r="3" />
       <circle cx="6" cy="12" r="3" />
       <circle cx="18" cy="19" r="3" />
@@ -74,7 +75,7 @@ function ShareIcon() {
 
 function CheckIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
       <polyline points="20 6 9 17 4 12" />
     </svg>
   );

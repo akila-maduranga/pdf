@@ -1,11 +1,12 @@
 'use client';
 
+import { Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 
 type Category = { id: string; name: string; slug: string };
 
-export default function CategoryFilter({
+function CategoryFilterInner({
   categories,
   basePath,
 }: {
@@ -21,10 +22,10 @@ export default function CategoryFilter({
     <div className="mt-6 flex flex-wrap gap-2">
       <Link
         href={basePath}
-        className={`rounded-full border px-3 py-1.5 font-mono text-xs uppercase tracking-wider transition-colors ${
+        className={`rounded-lg px-4 py-2 font-body text-xs font-semibold uppercase tracking-wider transition-all active:scale-95 btn-press ${
           !active
-            ? 'border-rose-gold bg-rose-gold/15 text-rose-gold'
-            : 'border-velvet-border/30 text-velvet-text/55 hover:border-velvet-border/50 hover:text-velvet-text'
+            ? 'bg-rose text-white shadow-lg shadow-rose/20'
+            : 'bg-surface border border-border text-text-muted hover:border-rose/30 hover:text-rose-light'
         }`}
       >
         All
@@ -33,15 +34,29 @@ export default function CategoryFilter({
         <Link
           key={c.id}
           href={`${basePath}?category=${c.slug}`}
-          className={`rounded-full border px-3 py-1.5 font-mono text-xs uppercase tracking-wider transition-colors ${
+          className={`rounded-lg px-4 py-2 font-body text-xs font-semibold uppercase tracking-wider transition-all active:scale-95 btn-press ${
             active === c.slug
-              ? 'border-rose-gold bg-rose-gold/15 text-rose-gold'
-              : 'border-velvet-border/30 text-velvet-text/55 hover:border-velvet-border/50 hover:text-velvet-text'
+              ? 'bg-rose text-white shadow-lg shadow-rose/20'
+              : 'bg-surface border border-border text-text-muted hover:border-rose/30 hover:text-rose-light'
           }`}
         >
           {c.name}
         </Link>
       ))}
     </div>
+  );
+}
+
+export default function CategoryFilter({
+  categories,
+  basePath,
+}: {
+  categories: Category[];
+  basePath: string;
+}) {
+  return (
+    <Suspense fallback={null}>
+      <CategoryFilterInner categories={categories} basePath={basePath} />
+    </Suspense>
   );
 }
