@@ -59,47 +59,90 @@ export default async function FilesPage({
             <p className="font-body text-sm">No stories yet</p>
           </div>
         ) : (
-          <div className="mt-8 grid grid-cols-2 md:grid-cols-3 gap-4">
-            {files.map((f: any) => (
-              <div
-                key={f.id}
-                className="bg-surface border border-border rounded-2xl overflow-hidden card-glow group relative"
-              >
-                <Link href={`/view/${f.share_id}`} className="block">
-                  <div className="aspect-[4/5] bg-surface-2 flex items-center justify-center">
-                    {f.thumbnail_path ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={`/api/thumb/file/${f.share_id}`}
-                        alt={f.title}
-                        className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
-                      />
-                    ) : (
-                      <span className="text-text-dim font-body text-2xl font-medium tracking-wide">PDF</span>
-                    )}
-                  </div>
-                  <div className="p-3 pr-10">
-                    {f.categories ? (
-                      <span className="mb-1 inline-block rounded-full bg-rose/10 text-rose-light text-[10px] font-medium uppercase tracking-wider">
-                        {f.categories.name}
-                      </span>
-                    ) : null}
-                    <p className="truncate text-text text-sm font-medium group-hover:text-rose-light transition-colors">
-                      {f.title}
-                    </p>
-                    {f.description ? (
-                      <p className="mt-1 line-clamp-2 text-text-dim text-xs">{f.description}</p>
-                    ) : null}
-                  </div>
-                </Link>
-                <ShareButton
-                  path={`/view/${f.share_id}`}
-                  title={f.title}
-                  className="absolute right-3 top-3 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
-                />
-              </div>
-            ))}
-          </div>
+          <>
+            {/* Mobile: list layout with full titles */}
+            <div className="mt-8 space-y-2 sm:hidden">
+              {files.map((f: any) => (
+                <div
+                  key={f.id}
+                  className="bg-surface border border-border rounded-xl p-3 card-glow group flex items-center gap-3"
+                >
+                  <Link href={`/view/${f.share_id}`} className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="flex h-12 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-2">
+                      {f.thumbnail_path ? (
+                        <img
+                          src={`/api/thumb/file/${f.share_id}`}
+                          alt={f.title}
+                          className="h-full w-full object-cover rounded-lg"
+                        />
+                      ) : (
+                        <span className="text-text-dim font-body text-xs font-bold">PDF</span>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      {f.categories ? (
+                        <span className="mb-0.5 inline-block rounded-full bg-rose/10 text-rose-light text-[9px] font-medium uppercase tracking-wider">
+                          {f.categories.name}
+                        </span>
+                      ) : null}
+                      <p className="text-text text-sm font-medium group-hover:text-rose-light transition-colors leading-snug">
+                        {f.title}
+                      </p>
+                      {f.description ? (
+                        <p className="mt-0.5 line-clamp-1 text-text-dim text-xs">{f.description}</p>
+                      ) : null}
+                    </div>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-text-dim shrink-0">
+                      <polyline points="9 18 15 12 9 6" />
+                    </svg>
+                  </Link>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop: grid layout */}
+            <div className="mt-8 hidden sm:grid grid-cols-2 md:grid-cols-3 gap-4">
+              {files.map((f: any) => (
+                <div
+                  key={f.id}
+                  className="bg-surface border border-border rounded-2xl overflow-hidden card-glow group relative"
+                >
+                  <Link href={`/view/${f.share_id}`} className="block">
+                    <div className="aspect-[4/5] bg-surface-2 flex items-center justify-center">
+                      {f.thumbnail_path ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={`/api/thumb/file/${f.share_id}`}
+                          alt={f.title}
+                          className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                        />
+                      ) : (
+                        <span className="text-text-dim font-body text-2xl font-medium tracking-wide">PDF</span>
+                      )}
+                    </div>
+                    <div className="p-3 pr-10">
+                      {f.categories ? (
+                        <span className="mb-1 inline-block rounded-full bg-rose/10 text-rose-light text-[10px] font-medium uppercase tracking-wider">
+                          {f.categories.name}
+                        </span>
+                      ) : null}
+                      <p className="text-text text-sm font-medium group-hover:text-rose-light transition-colors leading-snug">
+                        {f.title}
+                      </p>
+                      {f.description ? (
+                        <p className="mt-1 line-clamp-2 text-text-dim text-xs">{f.description}</p>
+                      ) : null}
+                    </div>
+                  </Link>
+                  <ShareButton
+                    path={`/view/${f.share_id}`}
+                    title={f.title}
+                    className="absolute right-3 top-3 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+                  />
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </main>
     </>

@@ -165,41 +165,85 @@ export default async function ViewPage({ params }: { params: { shareId: string }
           )}
         </div>
 
-        {/* Chapter navigation buttons */}
+        {/* Chapter navigation buttons - sticky on mobile */}
         {collectionContext && (
-          <div className="mt-6 flex items-center justify-between gap-4">
-            {collectionContext.prevItem ? (
-              <Link
-                href={`/view/${collectionContext.prevItem.shareId}`}
-                className="flex-1 flex items-center justify-center gap-2 bg-surface border border-border rounded-xl px-4 py-3 text-sm font-body text-text-muted hover:text-rose-light hover:border-rose/20 transition-all btn-press"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polyline points="15 18 9 12 15 6" />
-                </svg>
-                <span className="truncate hidden sm:inline max-w-[200px]">{collectionContext.prevItem.title}</span>
-                <span className="truncate sm:hidden">Previous</span>
-              </Link>
-            ) : (
-              <div className="flex-1" />
-            )}
-            <span className="text-text-dim text-xs font-body px-2">
-              {collectionContext.partNumber} / {collectionContext.totalParts}
-            </span>
-            {collectionContext.nextItem ? (
-              <Link
-                href={`/view/${collectionContext.nextItem.shareId}`}
-                className="flex-1 flex items-center justify-center gap-2 bg-rose/10 border border-rose/20 rounded-xl px-4 py-3 text-sm font-body text-rose-light hover:bg-rose/20 transition-all btn-press"
-              >
-                <span className="truncate hidden sm:inline max-w-[200px]">{collectionContext.nextItem.title}</span>
-                <span className="truncate sm:hidden">Next</span>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <polyline points="9 18 15 12 9 6" />
-                </svg>
-              </Link>
-            ) : (
-              <div className="flex-1" />
-            )}
-          </div>
+          <>
+            {/* Mobile: fixed bottom bar above native nav */}
+            <div className="sm:hidden fixed bottom-12 left-0 right-0 z-30 px-3 pb-1">
+              <div className="flex items-center gap-2">
+                {collectionContext.prevItem ? (
+                  <Link
+                    href={`/view/${collectionContext.prevItem.shareId}`}
+                    className="flex-1 flex items-center justify-center gap-1.5 bg-rose/15 backdrop-blur-md border border-rose/20 rounded-xl py-3 text-sm font-body text-rose-light btn-press"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <polyline points="15 18 9 12 15 6" />
+                    </svg>
+                    Prev
+                  </Link>
+                ) : (
+                  <div className="flex-1" />
+                )}
+                <Link
+                  href={`/collection/${collectionContext.collectionShareId}`}
+                  className="flex items-center justify-center bg-surface-2/90 backdrop-blur-md border border-border rounded-xl px-3 py-3 text-text-dim btn-press"
+                >
+                  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                  </svg>
+                </Link>
+                {collectionContext.nextItem ? (
+                  <Link
+                    href={`/view/${collectionContext.nextItem.shareId}`}
+                    className="flex-1 flex items-center justify-center gap-1.5 bg-rose backdrop-blur-md border border-rose rounded-xl py-3 text-sm font-body text-white btn-press"
+                  >
+                    Next
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <polyline points="9 18 15 12 9 6" />
+                    </svg>
+                  </Link>
+                ) : (
+                  <div className="flex-1" />
+                )}
+              </div>
+            </div>
+
+            {/* Desktop: inline chapter nav */}
+            <div className="hidden sm:flex mt-6 items-center justify-between gap-4">
+              {collectionContext.prevItem ? (
+                <Link
+                  href={`/view/${collectionContext.prevItem.shareId}`}
+                  className="flex-1 flex items-center justify-center gap-2 bg-surface border border-border rounded-xl px-4 py-3 text-sm font-body text-text-muted hover:text-rose-light hover:border-rose/20 transition-all btn-press"
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="15 18 9 12 15 6" />
+                  </svg>
+                  <span className="truncate max-w-[200px]">{collectionContext.prevItem.title}</span>
+                </Link>
+              ) : (
+                <div className="flex-1" />
+              )}
+              <span className="text-text-dim text-xs font-body px-2">
+                Ch {collectionContext.partNumber} / {collectionContext.totalParts}
+              </span>
+              {collectionContext.nextItem ? (
+                <Link
+                  href={`/view/${collectionContext.nextItem.shareId}`}
+                  className="flex-1 flex items-center justify-center gap-2 bg-rose/10 border border-rose/20 rounded-xl px-4 py-3 text-sm font-body text-rose-light hover:bg-rose/20 transition-all btn-press"
+                >
+                  <span className="truncate max-w-[200px]">{collectionContext.nextItem.title}</span>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+                </Link>
+              ) : (
+                <div className="flex-1" />
+              )}
+            </div>
+
+            {/* Spacer for mobile fixed bar */}
+            <div className="sm:hidden h-16" />
+          </>
         )}
 
         <div className="mt-8 bg-surface border border-border rounded-xl p-4">

@@ -4,6 +4,7 @@ import { unstable_noStore as noStore } from 'next/cache';
 import { supabaseServer } from '@/lib/supabaseServer';
 import SiteHeader from '@/components/SiteHeader';
 import SearchBar from '@/components/SearchBar';
+import CategoryFilter from '@/components/CategoryFilter';
 import ShareButton from '@/components/ShareButton';
 
 export const dynamic = 'force-dynamic';
@@ -17,10 +18,13 @@ export default async function CollectionsPage({
   noStore();
   const supabase = supabaseServer();
 
-  const { data: allCollections } = await supabase
-    .from('collections')
-    .select('id, title, description, share_id, categories(name)')
-    .order('created_at', { ascending: false });
+  const [{ data: categories }, { data: allCollections }] = await Promise.all([
+    supabase.from('categories').select('id, name, slug').order('name'),
+    supabase
+      .from('collections')
+      .select('id, title, description, share_id, category_id, categories(name, slug)')
+      .order('created_at', { ascending: false }),
+  ]);
 
   const collectionIds = (allCollections || []).map((c: any) => c.id);
   const { data: itemCounts } = collectionIds.length
@@ -35,7 +39,7 @@ export default async function CollectionsPage({
   let collections = allCollections || [];
 
   if (searchParams.category) {
-    collections = collections.filter((c: any) => c.categories?.name?.toLowerCase().replace(/\s+/g, '-') === searchParams.category.toLowerCase());
+    collections = collections.filter((c: any) => c.categories?.slug === searchParams.category);
   }
 
   if (searchParams.q) {
@@ -55,6 +59,10 @@ export default async function CollectionsPage({
             <SearchBar />
           </Suspense>
         </div>
+
+        <Suspense fallback={null}>
+          <CategoryFilter categories={categories || []} basePath="/collections" />
+        </Suspense>
 
         {!collections.length ? (
           <div className="mt-16 flex flex-col items-center gap-3 text-text-dim">
@@ -80,7 +88,7 @@ export default async function CollectionsPage({
                     <p className="mt-1.5 line-clamp-2 text-text-muted text-sm">{c.description}</p>
                   ) : null}
                   <p className="mt-3 text-text-dim text-xs">
-                    {countMap[c.id] || 0} {countMap[c.id] === 1 ? 'part' : 'parts'}
+                    {countMap[c.id] || 0} {countMap[c.id] === 1 ? 'chapter' : 'chapters'}
                   </p>
                 </Link>
                 <ShareButton
