@@ -13,7 +13,7 @@ export default function Home() {
             </span>
           </h1>
           <p className="mx-auto mt-6 max-w-md text-text-muted text-lg font-body leading-relaxed">
-            Documents, images &amp; collections
+            Sexy stories, photos &amp; full stories
           </p>
 
           <div className="mt-14 grid grid-cols-1 gap-4 sm:grid-cols-3">
@@ -37,10 +37,10 @@ export default function Home() {
                   </svg>
                 </div>
                 <h2 className="font-display text-xl text-text group-hover:text-rose-light transition-colors">
-                  Documents
+                  Sexy Stories
                 </h2>
                 <p className="mt-2 text-text-muted text-sm">
-                  PDFs and documents, curated and organized.
+                  Stories and tales, curated and organized.
                 </p>
               </div>
             </Link>
@@ -63,10 +63,10 @@ export default function Home() {
                   </svg>
                 </div>
                 <h2 className="font-display text-xl text-text group-hover:text-gold-light transition-colors">
-                  Images
+                  Sexy Photos
                 </h2>
                 <p className="mt-2 text-text-muted text-sm">
-                  A curated collection of visual content.
+                  A curated gallery of stunning photos.
                 </p>
               </div>
             </Link>
@@ -87,10 +87,10 @@ export default function Home() {
                   </svg>
                 </div>
                 <h2 className="font-display text-xl text-text group-hover:text-rose-light transition-colors">
-                  Collections
+                  Full Stories
                 </h2>
                 <p className="mt-2 text-text-muted text-sm">
-                  Grouped series, chapters, and curated sets.
+                  Complete series, chapters, and full story collections.
                 </p>
               </div>
             </Link>

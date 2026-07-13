@@ -1,16 +1,42 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+import { useState, useRef, useEffect } from 'react';
 
 const LINKS = [
-  { href: '/files', label: 'Documents', icon: FileIcon },
-  { href: '/images', label: 'Images', icon: ImageIcon },
-  { href: '/collections', label: 'Collections', icon: CollectionIcon },
+  { href: '/files', label: 'Sexy Stories', icon: FileIcon },
+  { href: '/images', label: 'Sexy Photos', icon: ImageIcon },
+  { href: '/collections', label: 'Full Stories', icon: CollectionIcon },
 ];
 
 export default function SiteHeader() {
   const pathname = usePathname();
+  const router = useRouter();
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (searchOpen && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [searchOpen]);
+
+  useEffect(() => {
+    setSearchOpen(false);
+    setSearchQuery('');
+  }, [pathname]);
+
+  function handleSearch(e: React.FormEvent) {
+    e.preventDefault();
+    const q = searchQuery.trim();
+    if (q) {
+      router.push(`/search?q=${encodeURIComponent(q)}`);
+      setSearchOpen(false);
+      setSearchQuery('');
+    }
+  }
 
   return (
     <>
@@ -22,27 +48,61 @@ export default function SiteHeader() {
             </span>
           </Link>
 
-          {/* Desktop nav */}
-          <nav className="hidden sm:flex items-center gap-1">
-            {LINKS.map((link) => {
-              const active = pathname?.startsWith(link.href);
-              const Icon = link.icon;
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 font-body text-sm font-medium transition-all btn-press ${
-                    active
-                      ? 'bg-rose/15 text-rose-light border border-rose/20'
-                      : 'text-text-muted hover:text-text hover:bg-surface'
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  {link.label}
-                </Link>
-              );
-            })}
-          </nav>
+          <div className="flex items-center gap-2">
+            {/* Search */}
+            {searchOpen ? (
+              <form onSubmit={handleSearch} className="flex items-center">
+                <div className="relative">
+                  <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-dim pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="M21 21l-4.35-4.35" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  <input
+                    ref={inputRef}
+                    type="search"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onBlur={() => { if (!searchQuery.trim()) setSearchOpen(false); }}
+                    placeholder="Search..."
+                    className="w-48 sm:w-64 rounded-xl bg-surface border border-border pl-10 pr-4 py-2 text-sm text-text placeholder:text-text-dim outline-none focus:border-rose/40 focus:ring-1 focus:ring-rose/20 transition-all"
+                  />
+                </div>
+              </form>
+            ) : (
+              <button
+                onClick={() => setSearchOpen(true)}
+                className="p-2 rounded-lg text-text-muted hover:text-text hover:bg-surface transition-all btn-press"
+                aria-label="Search"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="M21 21l-4.35-4.35" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            )}
+
+            {/* Desktop nav */}
+            <nav className="hidden sm:flex items-center gap-1">
+              {LINKS.map((link) => {
+                const active = pathname?.startsWith(link.href);
+                const Icon = link.icon;
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 font-body text-sm font-medium transition-all btn-press ${
+                      active
+                        ? 'bg-rose/15 text-rose-light border border-rose/20'
+                        : 'text-text-muted hover:text-text hover:bg-surface'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    {link.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
         </div>
       </header>
 

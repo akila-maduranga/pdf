@@ -89,6 +89,9 @@ export default async function ViewPage({ params }: { params: { shareId: string }
   const { type, item } = result as any;
   const collectionContext = await getCollectionContext(type, item.id);
 
+  const backLabel = type === 'file' ? 'Sexy Stories' : 'Sexy Photos';
+  const backHref = type === 'file' ? '/files' : '/images';
+
   return (
     <>
       <SiteHeader />
@@ -97,48 +100,40 @@ export default async function ViewPage({ params }: { params: { shareId: string }
         <ViewTracker itemType={type} itemId={item.id} />
 
         <Link
-          href={type === 'file' ? '/files' : '/images'}
+          href={backHref}
           className="inline-flex items-center gap-1.5 font-body text-sm text-text-dim hover:text-rose-light transition-colors"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <polyline points="15 18 9 12 15 6" />
           </svg>
-          {type === 'file' ? 'Documents' : 'Images'}
+          {backLabel}
         </Link>
 
-        {collectionContext ? (
-          <div className="mt-4 bg-surface-2 border border-border rounded-xl p-4">
+        {/* Collection info bar */}
+        {collectionContext && (
+          <div className="mt-4 bg-surface-2 border border-border rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <p className="text-text-dim text-xs font-body uppercase tracking-wider mb-1">
+                Chapter {collectionContext.partNumber} of {collectionContext.totalParts}
+              </p>
+              <Link
+                href={`/collection/${collectionContext.collectionShareId}`}
+                className="font-display text-sm text-rose-light hover:text-rose transition-colors"
+              >
+                {collectionContext.collectionTitle}
+              </Link>
+            </div>
             <Link
               href={`/collection/${collectionContext.collectionShareId}`}
-              className="font-body text-sm text-rose-light hover:text-rose transition-colors"
+              className="inline-flex items-center gap-2 self-start sm:self-auto bg-rose/10 hover:bg-rose/20 border border-rose/20 text-rose-light rounded-lg px-4 py-2 text-sm font-body font-medium transition-all btn-press"
             >
-              {collectionContext.collectionTitle} &middot; Part {collectionContext.partNumber} of{' '}
-              {collectionContext.totalParts}
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+              </svg>
+              Full Story
             </Link>
-            <div className="mt-2 flex items-center justify-between text-sm">
-              {collectionContext.prevItem ? (
-                <Link
-                  href={`/view/${collectionContext.prevItem.shareId}`}
-                  className="text-text-dim hover:text-rose-light font-body text-sm transition-colors"
-                >
-                  &larr; {collectionContext.prevItem.title}
-                </Link>
-              ) : (
-                <span />
-              )}
-              {collectionContext.nextItem ? (
-                <Link
-                  href={`/view/${collectionContext.nextItem.shareId}`}
-                  className="text-text-dim hover:text-rose-light font-body text-sm transition-colors"
-                >
-                  {collectionContext.nextItem.title} &rarr;
-                </Link>
-              ) : (
-                <span />
-              )}
-            </div>
           </div>
-        ) : null}
+        )}
 
         <div className="mt-6 flex items-start justify-between gap-4">
           <div>
@@ -169,6 +164,43 @@ export default async function ViewPage({ params }: { params: { shareId: string }
             <ImageViewer shareId={item.share_id} alt={item.title} />
           )}
         </div>
+
+        {/* Chapter navigation buttons */}
+        {collectionContext && (
+          <div className="mt-6 flex items-center justify-between gap-4">
+            {collectionContext.prevItem ? (
+              <Link
+                href={`/view/${collectionContext.prevItem.shareId}`}
+                className="flex-1 flex items-center justify-center gap-2 bg-surface border border-border rounded-xl px-4 py-3 text-sm font-body text-text-muted hover:text-rose-light hover:border-rose/20 transition-all btn-press"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="15 18 9 12 15 6" />
+                </svg>
+                <span className="truncate hidden sm:inline max-w-[200px]">{collectionContext.prevItem.title}</span>
+                <span className="truncate sm:hidden">Previous</span>
+              </Link>
+            ) : (
+              <div className="flex-1" />
+            )}
+            <span className="text-text-dim text-xs font-body px-2">
+              {collectionContext.partNumber} / {collectionContext.totalParts}
+            </span>
+            {collectionContext.nextItem ? (
+              <Link
+                href={`/view/${collectionContext.nextItem.shareId}`}
+                className="flex-1 flex items-center justify-center gap-2 bg-rose/10 border border-rose/20 rounded-xl px-4 py-3 text-sm font-body text-rose-light hover:bg-rose/20 transition-all btn-press"
+              >
+                <span className="truncate hidden sm:inline max-w-[200px]">{collectionContext.nextItem.title}</span>
+                <span className="truncate sm:hidden">Next</span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <polyline points="9 18 15 12 9 6" />
+                </svg>
+              </Link>
+            ) : (
+              <div className="flex-1" />
+            )}
+          </div>
+        )}
 
         <div className="mt-8 bg-surface border border-border rounded-xl p-4">
           <p className="mb-3 text-text-muted text-sm font-body">Reactions</p>

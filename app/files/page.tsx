@@ -41,8 +41,8 @@ export default async function FilesPage({
     <>
       <SiteHeader />
       <main className="mx-auto min-h-screen max-w-5xl px-4 py-12 pb-24 sm:px-8 sm:pb-12">
-        <h1 className="font-display text-3xl font-semibold text-text">Documents</h1>
-        <p className="mt-1 text-text-muted text-sm">Browse all uploaded documents and PDFs.</p>
+        <h1 className="font-display text-3xl font-semibold text-text">Sexy Stories</h1>
+        <p className="mt-1 text-text-muted text-sm">Browse all sexy stories.</p>
 
         <div className="mt-6 max-w-md">
           <Suspense fallback={null}>
@@ -56,7 +56,7 @@ export default async function FilesPage({
 
         {!files.length ? (
           <div className="mt-16 flex flex-col items-center gap-3 text-text-dim">
-            <p className="font-body text-sm">No documents yet</p>
+            <p className="font-body text-sm">No stories yet</p>
           </div>
         ) : (
           <div className="mt-8 grid grid-cols-2 md:grid-cols-3 gap-4">

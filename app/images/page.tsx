@@ -41,8 +41,8 @@ export default async function ImagesPage({
     <>
       <SiteHeader />
       <main className="mx-auto min-h-screen max-w-5xl px-4 py-12 pb-24 sm:px-8 sm:pb-12">
-        <h1 className="font-display text-3xl font-semibold text-text">Images</h1>
-        <p className="mt-1 text-text-muted text-sm">Browse all uploaded images.</p>
+        <h1 className="font-display text-3xl font-semibold text-text">Sexy Photos</h1>
+        <p className="mt-1 text-text-muted text-sm">Browse all sexy photos.</p>
 
         <div className="mt-6 max-w-md">
           <Suspense fallback={null}>

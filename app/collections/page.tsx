@@ -47,8 +47,8 @@ export default async function CollectionsPage({
     <>
       <SiteHeader />
       <main className="mx-auto min-h-screen max-w-5xl px-4 py-12 pb-24 sm:px-8 sm:pb-12">
-        <h1 className="font-display text-3xl font-semibold text-text">Collections</h1>
-        <p className="mt-1 text-text-muted text-sm">Browse curated collections and grouped series.</p>
+        <h1 className="font-display text-3xl font-semibold text-text">Full Stories</h1>
+        <p className="mt-1 text-text-muted text-sm">Browse complete stories and grouped series.</p>
 
         <div className="mt-6 max-w-md">
           <Suspense fallback={null}>
@@ -58,7 +58,7 @@ export default async function CollectionsPage({
 
         {!collections.length ? (
           <div className="mt-16 flex flex-col items-center gap-3 text-text-dim">
-            <p className="font-body text-sm">No collections yet</p>
+            <p className="font-body text-sm">No stories yet</p>
           </div>
         ) : (
           <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">

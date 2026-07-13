@@ -56,7 +56,7 @@ export default async function CollectionPage({ params }: { params: { shareId: st
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <polyline points="15 18 9 12 15 6" />
           </svg>
-          Collections
+          Full Stories
         </Link>
 
         <div className="mt-4 flex items-start justify-between gap-4">
@@ -82,7 +82,7 @@ export default async function CollectionPage({ params }: { params: { shareId: st
 
         {!parts.length ? (
           <div className="mt-10 flex flex-col items-center gap-3 text-text-dim">
-            <p className="font-body text-sm">No parts in this collection</p>
+            <p className="font-body text-sm">No chapters in this story</p>
           </div>
         ) : (
           <ol className="mt-8 space-y-2">
@@ -101,7 +101,7 @@ export default async function CollectionPage({ params }: { params: { shareId: st
                         {part.source.title}
                       </p>
                       <span className="font-body text-text-dim text-xs uppercase tracking-wider">
-                        {part.item_type === 'file' ? 'Document' : 'Image'}
+                        {part.item_type === 'file' ? 'Story' : 'Photo'}
                       </span>
                     </span>
                     <svg
@@ -121,7 +121,7 @@ export default async function CollectionPage({ params }: { params: { shareId: st
                     <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-2 font-body text-sm text-text-dim">
                       {index + 1}
                     </span>
-                    <span className="font-body text-sm italic">Part removed</span>
+                    <span className="font-body text-sm italic">Chapter removed</span>
                   </div>
                 )}
               </li>

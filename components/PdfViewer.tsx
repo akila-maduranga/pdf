@@ -18,15 +18,17 @@ export default function PdfViewer({ shareId }: Props) {
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
   const isSwiping = useRef(false);
+  const dpr = useRef(1);
 
-  // Auto-fit to container width
+  // Auto-fit to container width using window width (reliable on mobile)
   const fitToWidth = useCallback(async () => {
-    if (!docRef.current || !containerRef.current) return;
+    if (!docRef.current) return;
     const page = await docRef.current.getPage(pageNum);
-    const containerWidth = containerRef.current.clientWidth - 16; // padding
     const defaultViewport = page.getViewport({ scale: 1 });
-    const newScale = containerWidth / defaultViewport.width;
-    setScale(Math.min(Math.max(newScale, 0.5), 3));
+    // Use window.innerWidth minus page padding (px-4 = 16px each side) and container padding (p-2 = 8px each side)
+    const availableWidth = window.innerWidth - 32 - 16;
+    const newScale = availableWidth / defaultViewport.width;
+    setScale(Math.min(Math.max(newScale, 0.8), 3));
   }, [pageNum]);
 
   useEffect(() => {
@@ -61,13 +63,17 @@ export default function PdfViewer({ shareId }: Props) {
   // Re-fit on page change and initial load
   useEffect(() => {
     if (status === 'ready') {
-      fitToWidth();
+      // Defer to next frame so the DOM has its final layout
+      const raf = requestAnimationFrame(() => {
+        fitToWidth();
+      });
       // Show swipe hint on mobile for first load
       if (typeof window !== 'undefined' && 'ontouchstart' in window && pageNum === 1) {
         setShowSwipeHint(true);
         const timer = setTimeout(() => setShowSwipeHint(false), 4000);
-        return () => clearTimeout(timer);
+        return () => { cancelAnimationFrame(raf); clearTimeout(timer); };
       }
+      return () => cancelAnimationFrame(raf);
     }
   }, [status, pageNum, fitToWidth]);
 
@@ -84,11 +90,24 @@ export default function PdfViewer({ shareId }: Props) {
       if (!docRef.current || !canvasRef.current) return;
       const page = await docRef.current.getPage(pageNum);
       const viewport = page.getViewport({ scale });
+
+      // Capture device pixel ratio for crisp mobile rendering
+      const pixelRatio = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1;
+      dpr.current = pixelRatio;
+
       const canvas = canvasRef.current;
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
-      canvas.width = viewport.width;
-      canvas.height = viewport.height;
+
+      // Set canvas buffer to high-res, but display at CSS size
+      canvas.width = Math.floor(viewport.width * pixelRatio);
+      canvas.height = Math.floor(viewport.height * pixelRatio);
+      canvas.style.width = `${viewport.width}px`;
+      canvas.style.height = `${viewport.height}px`;
+
+      // Scale the context so PDF renders at full device resolution
+      ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+
       await page.render({ canvasContext: ctx, viewport }).promise;
     }
     if (status === 'ready') renderPage();
