@@ -30,12 +30,6 @@ export default function Home() {
           >
             Browse collections
           </Link>
-          <Link
-            href="/stats"
-            className="rounded-lg border border-brass/30 bg-brass/10 px-6 py-3 font-body text-sm text-brass transition-colors hover:bg-brass/20"
-          >
-            Peek at stats
-          </Link>
         </div>
       </div>
     </main>

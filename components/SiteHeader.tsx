@@ -7,7 +7,6 @@ const LINKS = [
   { href: '/files', label: 'Documents' },
   { href: '/images', label: 'Images' },
   { href: '/collections', label: 'Collections' },
-  { href: '/stats', label: 'Stats' },
 ];
 
 export default function SiteHeader() {
@@ -36,18 +35,7 @@ export default function SiteHeader() {
                     : 'text-paper/55 hover:text-brass'
                 }`}
               >
-                {link.label === 'Stats' ? (
-                  <span className="flex items-center gap-1">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="3" y="12" width="4" height="9" rx="1" />
-                      <rect x="10" y="7" width="4" height="14" rx="1" />
-                      <rect x="17" y="3" width="4" height="18" rx="1" />
-                    </svg>
-                    <span className="hidden sm:inline">{link.label}</span>
-                  </span>
-                ) : (
-                  link.label
-                )}
+                {link.label}
               </Link>
             );
           })}

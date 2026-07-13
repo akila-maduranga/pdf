@@ -90,7 +90,7 @@ export default async function AdminItemDetail({
             {events.slice(0, 25).map((e, i) => (
               <div key={i} className="flex items-center justify-between px-4 py-2 text-xs">
                 <span className="text-paper/70">{e.event_type === 'view' ? 'Gallery view' : 'Link click'}</span>
-                <span className="font-mono text-paper/40">{new Date(e.created_at).toLocaleString()}</span>
+                <span className="font-mono text-paper/40">{new Date(e.created_at).toLocaleString('en-US', { timeZone: 'Asia/Colombo' })}</span>
               </div>
             ))}
           </div>

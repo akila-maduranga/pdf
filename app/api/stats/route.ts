@@ -73,7 +73,7 @@ export async function GET() {
         return d >= dayStart && d < dayEnd;
       });
 
-      const dayLabel = dayStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      const dayLabel = dayStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'Asia/Colombo' });
       dailyChartData.push({
         date: dayLabel,
         views: dayEvents.filter((e) => e.event_type === 'view').length,
@@ -92,7 +92,7 @@ export async function GET() {
         return d >= hStart && d < hEnd;
       });
       hourlyChartData.push({
-        hour: hStart.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true }),
+        hour: hStart.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true, timeZone: 'Asia/Colombo' }),
         views: hEvents.length,
       });
     }
@@ -125,7 +125,7 @@ export async function GET() {
     // Peak hours (which hours of day get most traffic, all-time)
     const hourBuckets = new Array(24).fill(0);
     for (const e of allEvents) {
-      const h = new Date(e.created_at).getHours();
+      const h = parseInt(new Date(e.created_at).toLocaleString('en-US', { hour: 'numeric', hour12: false, timeZone: 'Asia/Colombo' }), 10);
       hourBuckets[h]++;
     }
     const peakHour = hourBuckets.indexOf(Math.max(...hourBuckets));
@@ -133,7 +133,7 @@ export async function GET() {
     // Busiest day ever
     const dayBuckets: Record<string, number> = {};
     for (const e of allEvents) {
-      const day = new Date(e.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      const day = new Date(e.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'Asia/Colombo' });
       dayBuckets[day] = (dayBuckets[day] || 0) + 1;
     }
     const busiestDay = Object.entries(dayBuckets).sort((a, b) => b[1] - a[1])[0];
@@ -164,7 +164,7 @@ export async function GET() {
       },
       funFacts: {
         peakHour,
-        peakHourLabel: new Date(2000, 0, 1, peakHour).toLocaleTimeString('en-US', { hour: 'numeric', hour12: true }),
+        peakHourLabel: new Date(2000, 0, 1, peakHour).toLocaleTimeString('en-US', { hour: 'numeric', hour12: true, timeZone: 'Asia/Colombo' }),
         busiestDay: busiestDay ? { date: busiestDay[0], count: busiestDay[1] } : null,
         avgViewsPerItem,
         totalReactions: allReactions.length,

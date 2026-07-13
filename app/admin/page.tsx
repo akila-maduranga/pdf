@@ -75,6 +75,9 @@ export default async function AdminDashboard() {
         <Link href="/admin/categories" className="rounded border border-line/20 px-4 py-2 text-sm hover:border-brass hover:text-brass">
           Manage categories
         </Link>
+        <Link href="/admin/stats" className="rounded border border-brass/30 bg-brass/10 px-4 py-2 text-sm text-brass hover:bg-brass/20">
+          Stats
+        </Link>
       </nav>
 
       <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-5">
