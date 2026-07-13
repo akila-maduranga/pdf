@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { getDeviceId } from '@/lib/deviceId';
 
-const EMOJIS = ['👍', '❤️', '😂', '😮', '😢', '🔥'];
+const EMOJIS = ['😍', '🔥', '😋', '😏', '🥵', '💜'];
 
 type Props = {
   itemType: 'file' | 'image';
@@ -28,7 +28,7 @@ export default function ReactionBar({ itemType, itemId }: Props) {
 
   async function react(emoji: string) {
     const deviceId = getDeviceId();
-    const next = mine === emoji ? null : emoji; // tap again to remove
+    const next = mine === emoji ? null : emoji;
     setMine(next);
     setCounts((prev) => {
       const updated = { ...prev };
@@ -52,8 +52,8 @@ export default function ReactionBar({ itemType, itemId }: Props) {
           disabled={loading}
           className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors ${
             mine === emoji
-              ? 'border-brass bg-brass/15 text-brass'
-              : 'border-line/20 bg-white/[0.03] text-paper/70 hover:border-line/40 hover:text-paper'
+              ? 'border-rose-gold bg-rose-gold/15 text-rose-gold'
+              : 'border-velvet-border/30 bg-velvet-surface/30 text-velvet-text/70 hover:border-velvet-border/50 hover:text-velvet-text'
           }`}
         >
           <span>{emoji}</span>

@@ -57,14 +57,14 @@ export default function CategorySelect({ name = 'categoryId', value, onChange }:
 
   return (
     <div>
-      <label className="block text-xs text-paper/50">Category</label>
+      <label className="block text-xs text-velvet-text/50">Category</label>
       {!adding ? (
         <div className="mt-1 flex gap-2">
           <select
             name={name}
             value={selected}
             onChange={(e) => handleSelect(e.target.value)}
-            className="w-full rounded border border-line/20 bg-black/20 px-3 py-2 text-sm text-paper outline-none focus:border-brass"
+            className="w-full rounded-lg border border-velvet-border/30 bg-midnight/30 px-3 py-2.5 text-sm text-velvet-text outline-none focus:border-rose-gold"
           >
             <option value="">No category</option>
             {categories.map((c) => (
@@ -76,7 +76,7 @@ export default function CategorySelect({ name = 'categoryId', value, onChange }:
           <button
             type="button"
             onClick={() => setAdding(true)}
-            className="shrink-0 rounded border border-line/20 px-3 py-2 text-xs text-paper/60 hover:border-brass hover:text-brass"
+            className="shrink-0 rounded-lg border border-velvet-border/30 px-3 py-2 text-xs text-velvet-text/60 hover:border-rose-gold hover:text-rose-gold"
           >
             + New
           </button>
@@ -94,20 +94,20 @@ export default function CategorySelect({ name = 'categoryId', value, onChange }:
               }
             }}
             placeholder="New category name"
-            className="w-full rounded border border-line/20 bg-black/20 px-3 py-2 text-sm outline-none focus:border-brass"
+            className="w-full rounded-lg border border-velvet-border/30 bg-midnight/30 px-3 py-2.5 text-sm text-velvet-text outline-none focus:border-rose-gold"
           />
           <button
             type="button"
             onClick={createCategory}
             disabled={busy || !newName.trim()}
-            className="shrink-0 rounded bg-brass px-3 py-2 text-xs font-medium text-ink hover:opacity-90 disabled:opacity-40"
+            className="shrink-0 rounded-lg bg-rose-gold px-3 py-2 text-xs font-medium text-velvet-bg hover:bg-rose-gold/90 disabled:opacity-40"
           >
             Add
           </button>
           <button
             type="button"
             onClick={() => setAdding(false)}
-            className="shrink-0 rounded border border-line/20 px-2 py-2 text-xs text-paper/50 hover:text-paper"
+            className="shrink-0 rounded-lg border border-velvet-border/30 px-2 py-2 text-xs text-velvet-text/50 hover:text-velvet-text"
           >
             ✕
           </button>

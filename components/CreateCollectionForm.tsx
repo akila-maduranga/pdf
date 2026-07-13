@@ -26,37 +26,37 @@ export default function CreateCollectionForm() {
     if (res.ok && data.collection) {
       router.push(`/admin/collections/${data.collection.id}`);
     } else {
-      setError(data.error || 'Nope, didn\'t work');
+      setError(data.error || 'Failed to create');
     }
   }
 
   return (
-    <form onSubmit={submit} className="rounded border border-line/15 bg-white/[0.02] p-5">
-      <p className="font-mono text-xs uppercase tracking-wider text-brass">Start a new bundle</p>
+    <form onSubmit={submit} className="rounded-xl border border-velvet-border/30 bg-velvet-surface/30 p-5">
+      <p className="font-mono text-xs uppercase tracking-wider text-rose-gold">Create a new collection</p>
       <div className="mt-4 grid gap-3 sm:grid-cols-2">
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
-          placeholder="Title (e.g. 'The Long Road, Chapters 1–5')"
-          className="rounded border border-line/20 bg-black/20 px-3 py-2 text-sm outline-none focus:border-brass sm:col-span-2"
+          placeholder="Title (e.g. 'Chapters 1-5')"
+          className="rounded-lg border border-velvet-border/30 bg-midnight/30 px-3 py-2.5 text-sm text-velvet-text outline-none focus:border-rose-gold sm:col-span-2"
         />
         <textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Description (optional)"
           rows={2}
-          className="rounded border border-line/20 bg-black/20 px-3 py-2 text-sm outline-none focus:border-brass sm:col-span-2"
+          className="rounded-lg border border-velvet-border/30 bg-midnight/30 px-3 py-2.5 text-sm text-velvet-text outline-none focus:border-rose-gold sm:col-span-2"
         />
         <CategorySelect value={categoryId} onChange={setCategoryId} />
       </div>
-      {error ? <p className="mt-3 text-sm text-rust">{error}</p> : null}
+      {error ? <p className="mt-3 text-sm text-wine">{error}</p> : null}
       <button
         type="submit"
         disabled={loading || !title.trim()}
-        className="mt-4 rounded bg-brass px-5 py-2 text-sm font-medium text-ink hover:opacity-90 disabled:opacity-40"
+        className="mt-4 rounded-lg bg-rose-gold px-5 py-2.5 text-sm font-medium text-velvet-bg hover:bg-rose-gold/90 disabled:opacity-40"
       >
-        {loading ? 'Making it...' : 'Create bundle'}
+        {loading ? 'Creating...' : 'Create collection'}
       </button>
     </form>
   );

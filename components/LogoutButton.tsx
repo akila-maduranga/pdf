@@ -11,7 +11,7 @@ export default function LogoutButton() {
         router.push('/admin/login');
         router.refresh();
       }}
-      className="rounded border border-line/20 px-3 py-1.5 text-xs text-paper/60 hover:border-rust hover:text-rust"
+      className="rounded-lg border border-velvet-border/30 px-3 py-1.5 text-xs text-velvet-text/60 hover:border-wine hover:text-wine"
     >
       Sign out
     </button>

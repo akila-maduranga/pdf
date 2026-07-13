@@ -3,7 +3,7 @@
 import { useState } from 'react';
 
 type Props = {
-  path: string; // e.g. `/view/abc123`
+  path: string;
   title: string;
   variant?: 'icon' | 'button';
   className?: string;
@@ -23,8 +23,7 @@ export default function ShareButton({ path, title, variant = 'icon', className =
         await (navigator as any).share({ title, url });
         return;
       } catch {
-        // user cancelled the native share sheet, or it isn't actually
-        // supported — fall through to clipboard copy
+        // user cancelled the native share sheet
       }
     }
 
@@ -33,7 +32,7 @@ export default function ShareButton({ path, title, variant = 'icon', className =
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch {
-      // clipboard blocked — ignore, nothing more we can do
+      // clipboard blocked
     }
   }
 
@@ -42,8 +41,8 @@ export default function ShareButton({ path, title, variant = 'icon', className =
       <button
         onClick={share}
         aria-label="Share"
-        title={copied ? 'Link copied' : 'Share'}
-        className={`flex h-8 w-8 items-center justify-center rounded-full border border-line/20 bg-ink/60 text-paper/75 backdrop-blur transition-colors hover:border-brass hover:text-brass ${className}`}
+        title={copied ? 'Link copied!' : 'Share'}
+        className={`flex h-8 w-8 items-center justify-center rounded-full border border-velvet-border/30 bg-velvet-bg/60 text-velvet-text/75 backdrop-blur transition-colors hover:border-rose-gold hover:text-rose-gold ${className}`}
       >
         {copied ? <CheckIcon /> : <ShareIcon />}
       </button>
@@ -53,10 +52,10 @@ export default function ShareButton({ path, title, variant = 'icon', className =
   return (
     <button
       onClick={share}
-      className={`flex items-center gap-1.5 rounded border border-line/20 px-3 py-1.5 text-xs text-paper/70 transition-colors hover:border-brass hover:text-brass ${className}`}
+      className={`flex items-center gap-1.5 rounded border border-velvet-border/30 px-3 py-1.5 text-xs text-velvet-text/70 transition-colors hover:border-rose-gold hover:text-rose-gold ${className}`}
     >
       {copied ? <CheckIcon /> : <ShareIcon />}
-      {copied ? 'Copied' : 'Share'}
+      {copied ? 'Copied!' : 'Share'}
     </button>
   );
 }

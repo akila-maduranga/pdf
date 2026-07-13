@@ -23,8 +23,8 @@ export default function CategoryFilter({
         href={basePath}
         className={`rounded-full border px-3 py-1.5 font-mono text-xs uppercase tracking-wider transition-colors ${
           !active
-            ? 'border-brass bg-brass/15 text-brass'
-            : 'border-line/20 text-paper/55 hover:border-line/40 hover:text-paper'
+            ? 'border-rose-gold bg-rose-gold/15 text-rose-gold'
+            : 'border-velvet-border/30 text-velvet-text/55 hover:border-velvet-border/50 hover:text-velvet-text'
         }`}
       >
         All
@@ -35,8 +35,8 @@ export default function CategoryFilter({
           href={`${basePath}?category=${c.slug}`}
           className={`rounded-full border px-3 py-1.5 font-mono text-xs uppercase tracking-wider transition-colors ${
             active === c.slug
-              ? 'border-brass bg-brass/15 text-brass'
-              : 'border-line/20 text-paper/55 hover:border-line/40 hover:text-paper'
+              ? 'border-rose-gold bg-rose-gold/15 text-rose-gold'
+              : 'border-velvet-border/30 text-velvet-text/55 hover:border-velvet-border/50 hover:text-velvet-text'
           }`}
         >
           {c.name}
