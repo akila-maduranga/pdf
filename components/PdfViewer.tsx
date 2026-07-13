@@ -1,156 +1,107 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { Document, Page, pdfjs } from 'react-pdf';
+import 'react-pdf/dist/Page/AnnotationLayer.css';
+import 'react-pdf/dist/Page/TextLayer.css';
+
+pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 type Props = {
   shareId: string;
 };
 
 export default function PdfViewer({ shareId }: Props) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const docRef = useRef<any>(null);
-  const [pageNum, setPageNum] = useState(1);
   const [numPages, setNumPages] = useState(0);
-  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [pageNum, setPageNum] = useState(1);
   const [scale, setScale] = useState(1.0);
-  const [showSwipeHint, setShowSwipeHint] = useState(false);
+  const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading');
+  const containerRef = useRef<HTMLDivElement>(null);
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
   const isSwiping = useRef(false);
 
-  // Auto-fit to container width using window width (reliable on mobile)
-  const fitToWidth = useCallback(async () => {
-    if (!docRef.current) return;
-    const page = await docRef.current.getPage(pageNum);
-    const defaultViewport = page.getViewport({ scale: 1 });
-    const availableWidth = window.innerWidth - 32 - 16;
-    const newScale = availableWidth / defaultViewport.width;
-    setScale(Math.min(Math.max(newScale, 0.8), 3));
-  }, [pageNum]);
+  function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
+    setNumPages(numPages);
+    setStatus('ready');
+    // Fit to width after render
+    requestAnimationFrame(() => {
+      if (containerRef.current) {
+        const w = containerRef.current.clientWidth - 16;
+        setScale(w / 612); // 612 is standard PDF width at scale 1
+      }
+    });
+  }
 
+  function onDocumentLoadError() {
+    setStatus('error');
+  }
+
+  // Re-fit on resize
   useEffect(() => {
-    let cancelled = false;
-
-    async function load() {
-      const pdfjsLib = await import('pdfjs-dist');
-      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
-
-      try {
-        const loadingTask = pdfjsLib.getDocument({
-          url: `/api/file-stream/${shareId}`,
-          disableAutoFetch: false,
-        });
-        const doc = await loadingTask.promise;
-        if (cancelled) return;
-        docRef.current = doc;
-        setNumPages(doc.numPages);
-        setStatus('ready');
-      } catch (err) {
-        console.error(err);
-        if (!cancelled) setStatus('error');
+    function handleResize() {
+      if (containerRef.current) {
+        const w = containerRef.current.clientWidth - 16;
+        setScale(w / 612);
       }
     }
-
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, [shareId]);
-
-  // Re-fit on page change and initial load
-  useEffect(() => {
-    if (status === 'ready') {
-      const raf = requestAnimationFrame(() => {
-        fitToWidth();
-      });
-      if (typeof window !== 'undefined' && 'ontouchstart' in window && pageNum === 1) {
-        setShowSwipeHint(true);
-        const timer = setTimeout(() => setShowSwipeHint(false), 4000);
-        return () => { cancelAnimationFrame(raf); clearTimeout(timer); };
-      }
-      return () => cancelAnimationFrame(raf);
-    }
-  }, [status, pageNum, fitToWidth]);
-
-  // Re-fit on window resize
-  useEffect(() => {
-    if (status !== 'ready') return;
-    const handleResize = () => fitToWidth();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [status, fitToWidth]);
+  }, []);
 
+  // Passive touch listeners for swipe page flip — never blocks scrolling
   useEffect(() => {
-    async function renderPage() {
-      if (!docRef.current || !canvasRef.current) return;
-      const page = await docRef.current.getPage(pageNum);
-      const viewport = page.getViewport({ scale });
+    const el = containerRef.current;
+    if (!el) return;
 
-      const pixelRatio = typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 1;
-
-      const canvas = canvasRef.current;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
-
-      canvas.width = Math.floor(viewport.width * pixelRatio);
-      canvas.height = Math.floor(viewport.height * pixelRatio);
-      canvas.style.width = `${viewport.width}px`;
-      canvas.style.height = `${viewport.height}px`;
-
-      ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-
-      await page.render({ canvasContext: ctx, viewport }).promise;
+    function onTouchStart(e: TouchEvent) {
+      touchStartX.current = e.touches[0].clientX;
+      touchStartY.current = e.touches[0].clientY;
+      isSwiping.current = false;
     }
-    if (status === 'ready') renderPage();
-  }, [pageNum, scale, status]);
-
-  // Touch handlers for swipe navigation
-  const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-    touchStartY.current = e.touches[0].clientY;
-    isSwiping.current = false;
-  }, []);
-
-  const handleTouchMove = useCallback((e: React.TouchEvent) => {
-    if (touchStartX.current === null || touchStartY.current === null) return;
-    const dx = e.touches[0].clientX - touchStartX.current;
-    const dy = e.touches[0].clientY - touchStartY.current;
-    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 15) {
-      isSwiping.current = true;
-    }
-  }, []);
-
-  const handleTouchEndSwipe = useCallback((e: React.TouchEvent) => {
-    if (!isSwiping.current) {
-      touchStartX.current = null;
-      touchStartY.current = null;
-      return;
-    }
-    const endX = e.changedTouches[0].clientX;
-    const startX = touchStartX.current || endX;
-    const diff = endX - startX;
-
-    if (Math.abs(diff) > 50) {
-      if (diff < 0) {
-        setPageNum((p) => Math.min(numPages, p + 1));
-      } else {
-        setPageNum((p) => Math.max(1, p - 1));
+    function onTouchMove(e: TouchEvent) {
+      if (touchStartX.current === null || touchStartY.current === null) return;
+      const dx = e.touches[0].clientX - touchStartX.current;
+      const dy = e.touches[0].clientY - touchStartY.current;
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 20) {
+        isSwiping.current = true;
       }
     }
-    touchStartX.current = null;
-    touchStartY.current = null;
-    isSwiping.current = false;
+    function onTouchEnd(e: TouchEvent) {
+      if (!isSwiping.current) {
+        touchStartX.current = null;
+        touchStartY.current = null;
+        return;
+      }
+      const endX = e.changedTouches[0].clientX;
+      const startX = touchStartX.current || endX;
+      const diff = endX - startX;
+      if (Math.abs(diff) > 60) {
+        if (diff < 0) setPageNum((p) => Math.min(numPages, p + 1));
+        else setPageNum((p) => Math.max(1, p - 1));
+      }
+      touchStartX.current = null;
+      touchStartY.current = null;
+      isSwiping.current = false;
+    }
+
+    el.addEventListener('touchstart', onTouchStart, { passive: true });
+    el.addEventListener('touchmove', onTouchMove, { passive: true });
+    el.addEventListener('touchend', onTouchEnd, { passive: true });
+    return () => {
+      el.removeEventListener('touchstart', onTouchStart);
+      el.removeEventListener('touchmove', onTouchMove);
+      el.removeEventListener('touchend', onTouchEnd);
+    };
   }, [numPages]);
 
-  if (status === 'loading') {
-    return (
-      <div className="flex h-64 flex-col items-center justify-center gap-3 text-text-muted">
-        <div className="h-10 w-10 animate-spin-slow rounded-full border-4 border-rose/20 border-t-rose" />
-        <p className="font-body text-sm">Loading story...</p>
-      </div>
-    );
-  }
+  const fitToWidth = useCallback(() => {
+    if (containerRef.current) {
+      const w = containerRef.current.clientWidth - 16;
+      setScale(w / 612);
+    }
+  }, []);
+
   if (status === 'error') {
     return (
       <div className="flex h-64 flex-col items-center justify-center gap-3 text-text-muted">
@@ -161,30 +112,35 @@ export default function PdfViewer({ shareId }: Props) {
 
   return (
     <div className="flex flex-col items-center gap-4">
-      {/* PDF Canvas Container */}
       <div
         ref={containerRef}
-        className="pdf-mobile-container relative w-full overflow-hidden rounded-xl border border-border bg-surface p-2 shadow-lg sm:p-4"
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEndSwipe}
+        className="relative w-full rounded-xl border border-border bg-surface p-2 shadow-lg sm:p-4"
       >
-        <canvas ref={canvasRef} className="mx-auto block max-w-full" />
-
-        {showSwipeHint && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/10 pointer-events-none">
-            <div className="flex items-center gap-2 rounded-lg bg-surface-2/90 backdrop-blur px-4 py-2 shadow-lg">
-              <span className="swipe-hint-anim text-2xl">👈</span>
-              <span className="font-body text-sm font-medium text-text">Swipe to flip pages</span>
-              <span className="swipe-hint-anim text-2xl" style={{ animationDelay: '0.2s' }}>👉</span>
-            </div>
+        {status === 'loading' && (
+          <div className="flex h-64 flex-col items-center justify-center gap-3 text-text-muted">
+            <div className="h-10 w-10 animate-spin-slow rounded-full border-4 border-rose/20 border-t-rose" />
+            <p className="font-body text-sm">Loading story...</p>
           </div>
         )}
+
+        <Document
+          file={`/api/file-stream/${shareId}`}
+          onLoadSuccess={onDocumentLoadSuccess}
+          onLoadError={onDocumentLoadError}
+          loading={null}
+        >
+          <Page
+            pageNumber={pageNum}
+            scale={scale}
+            renderTextLayer={false}
+            renderAnnotationLayer={false}
+            className="mx-auto block"
+          />
+        </Document>
       </div>
 
       {/* Controls */}
       <div className="flex flex-col items-center gap-3 w-full">
-        {/* Page navigation */}
         <div className="flex items-center justify-center gap-2">
           <button
             onClick={() => setPageNum((p) => Math.max(1, p - 1))}
@@ -207,7 +163,6 @@ export default function PdfViewer({ shareId }: Props) {
           </button>
         </div>
 
-        {/* Zoom controls */}
         <div className="flex items-center gap-2">
           <button
             onClick={() => setScale((s) => Math.max(0.4, s - 0.15))}
@@ -232,7 +187,6 @@ export default function PdfViewer({ shareId }: Props) {
           </span>
         </div>
 
-        {/* Page slider for mobile */}
         <div className="w-full max-w-xs sm:hidden">
           <input
             type="range"

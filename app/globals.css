@@ -84,15 +84,6 @@ html {
   pointer-events: none;
 }
 
-/* PDF mobile viewer styles */
-.pdf-mobile-container {
-  touch-action: pan-y pinch-zoom;
-  -webkit-overflow-scrolling: touch;
-}
-.pdf-mobile-container canvas {
-  touch-action: none;
-}
-
 /* Swipe indicator */
 @keyframes swipe-hint {
   0%, 100% { opacity: 0.4; transform: translateX(0); }
