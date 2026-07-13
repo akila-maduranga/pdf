@@ -17,12 +17,13 @@ export default async function AdminCollectionsPage() {
 
   return (
     <main className="mx-auto min-h-screen max-w-4xl px-4 py-10 sm:px-8">
-      <Link href="/admin" className="font-mono text-xs uppercase tracking-wider text-velvet-text/40 hover:text-rose-gold">
+      <Link href="/admin" className="font-mono text-xs uppercase tracking-wider text-text-dim hover:text-gold">
         ← Dashboard
       </Link>
-      <h1 className="mt-3 font-display text-3xl font-semibold">Collections</h1>
-      <p className="mt-2 text-sm text-velvet-text/50">
-        Group stories and images into chapters, issues, or series.
+      <h1 className="mt-3 font-display text-3xl font-semibold text-text">Collections</h1>
+      <p className="mt-2 text-sm text-text-muted">
+        Group several documents or images together as parts of one story — chapters, issues, a
+        photo series — with a single shareable link.
       </p>
 
       <div className="mt-6">
@@ -31,9 +32,9 @@ export default async function AdminCollectionsPage() {
 
       <div className="mt-8">
         {!collections?.length ? (
-          <p className="text-sm text-velvet-text/40">No collections yet. Create one!</p>
+          <p className="text-sm text-text-dim">No collections yet.</p>
         ) : (
-          <div className="divide-y divide-velvet-border/20 rounded-xl border border-velvet-border/30">
+          <div className="divide-y divide-border rounded-xl border border-border bg-surface">
             {collections.map((c: any) => (
               <AdminCollectionRow
                 key={c.id}

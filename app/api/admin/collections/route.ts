@@ -24,8 +24,7 @@ export async function POST(req: NextRequest) {
   if (!title) return NextResponse.json({ error: 'Title is required' }, { status: 400 });
 
   const supabase = supabaseServer();
-
-  // Generate a URL-friendly slug from the title
+  // Generate slug-based share_id
   const shareId = await generateUniqueSlug(title, async (slug) => {
     const { count } = await supabase
       .from('collections')

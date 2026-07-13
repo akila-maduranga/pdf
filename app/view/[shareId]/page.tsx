@@ -92,34 +92,46 @@ export default async function ViewPage({ params }: { params: { shareId: string }
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto min-h-screen max-w-4xl px-4 py-6 pb-24 sm:px-8 sm:py-10 sm:pb-10">
+      <main className="mx-auto min-h-screen max-w-4xl px-4 py-10 pb-24 sm:px-8 sm:pb-10">
         <ViewOnlyGuard />
         <ViewTracker itemType={type} itemId={item.id} />
 
-        <Link href={type === 'file' ? '/files' : '/images'} className="font-mono text-xs uppercase tracking-wider text-paper/40 hover:text-brass">
-          ← {type === 'file' ? 'Documents' : 'Images'}
+        <Link
+          href={type === 'file' ? '/files' : '/images'}
+          className="inline-flex items-center gap-1.5 font-body text-sm text-text-dim hover:text-rose-light transition-colors"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          {type === 'file' ? 'Documents' : 'Images'}
         </Link>
 
         {collectionContext ? (
-          <div className="mt-3 rounded-lg border border-line/15 bg-white/[0.02] px-4 py-3">
+          <div className="mt-4 bg-surface-2 border border-border rounded-xl p-4">
             <Link
               href={`/collection/${collectionContext.collectionShareId}`}
-              className="font-mono text-[11px] uppercase tracking-wider text-brass hover:underline"
+              className="font-body text-sm text-rose-light hover:text-rose transition-colors"
             >
-              {collectionContext.collectionTitle} · Part {collectionContext.partNumber} of{' '}
+              {collectionContext.collectionTitle} &middot; Part {collectionContext.partNumber} of{' '}
               {collectionContext.totalParts}
             </Link>
             <div className="mt-2 flex items-center justify-between text-sm">
               {collectionContext.prevItem ? (
-                <Link href={`/view/${collectionContext.prevItem.shareId}`} className="text-paper/60 hover:text-brass">
-                  ← {collectionContext.prevItem.title}
+                <Link
+                  href={`/view/${collectionContext.prevItem.shareId}`}
+                  className="text-text-dim hover:text-rose-light font-body text-sm transition-colors"
+                >
+                  &larr; {collectionContext.prevItem.title}
                 </Link>
               ) : (
                 <span />
               )}
               {collectionContext.nextItem ? (
-                <Link href={`/view/${collectionContext.nextItem.shareId}`} className="text-paper/60 hover:text-brass">
-                  {collectionContext.nextItem.title} →
+                <Link
+                  href={`/view/${collectionContext.nextItem.shareId}`}
+                  className="text-text-dim hover:text-rose-light font-body text-sm transition-colors"
+                >
+                  {collectionContext.nextItem.title} &rarr;
                 </Link>
               ) : (
                 <span />
@@ -128,20 +140,29 @@ export default async function ViewPage({ params }: { params: { shareId: string }
           </div>
         ) : null}
 
-        <div className="mt-4 flex items-start justify-between gap-4">
-          <div className="min-w-0 flex-1">
+        <div className="mt-6 flex items-start justify-between gap-4">
+          <div>
             {item.categories ? (
-              <span className="mb-2 inline-block rounded-full bg-brass/15 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-brass">
+              <span className="mb-2 inline-block rounded-full bg-rose/10 text-rose-light text-xs font-medium uppercase tracking-wider">
                 {item.categories.name}
               </span>
             ) : null}
-            <h1 className="font-display text-xl font-semibold text-paper sm:text-3xl">{item.title}</h1>
-            {item.description ? <p className="mt-2 text-sm text-paper/60">{item.description}</p> : null}
+            <h1 className="font-display text-2xl sm:text-3xl font-semibold text-text">
+              {item.title}
+            </h1>
+            {item.description ? (
+              <p className="mt-2 text-text-muted font-body">{item.description}</p>
+            ) : null}
           </div>
-          <ShareButton path={`/view/${item.share_id}`} title={item.title} variant="button" className="shrink-0" />
+          <ShareButton
+            path={`/view/${item.share_id}`}
+            title={item.title}
+            variant="button"
+            className="shrink-0"
+          />
         </div>
 
-        <div className="mt-6 sm:mt-8">
+        <div className="mt-8">
           {type === 'file' ? (
             <PdfViewer shareId={item.share_id} />
           ) : (
@@ -149,10 +170,8 @@ export default async function ViewPage({ params }: { params: { shareId: string }
           )}
         </div>
 
-        <div className="mt-6 border-t border-line/10 pt-6 sm:mt-8">
-          <p className="mb-3 font-mono text-xs uppercase tracking-wider text-paper/40">
-            How&apos;s this making you feel?
-          </p>
+        <div className="mt-8 bg-surface border border-border rounded-xl p-4">
+          <p className="mb-3 text-text-muted text-sm font-body">Reactions</p>
           <ReactionBar itemType={type} itemId={item.id} />
         </div>
       </main>

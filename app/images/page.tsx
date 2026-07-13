@@ -2,8 +2,8 @@ import Link from 'next/link';
 import { Suspense } from 'react';
 import { unstable_noStore as noStore } from 'next/cache';
 import { supabaseServer } from '@/lib/supabaseServer';
-import { hybridPath } from '@/lib/slugify';
 import SiteHeader from '@/components/SiteHeader';
+import SearchBar from '@/components/SearchBar';
 import CategoryFilter from '@/components/CategoryFilter';
 import ShareButton from '@/components/ShareButton';
 
@@ -13,7 +13,7 @@ export const revalidate = 0;
 export default async function ImagesPage({
   searchParams,
 }: {
-  searchParams: { category?: string };
+  searchParams: { q?: string; category?: string };
 }) {
   noStore();
   const supabase = supabaseServer();
@@ -26,37 +26,47 @@ export default async function ImagesPage({
       .order('created_at', { ascending: false }),
   ]);
 
-  const images = searchParams.category
-    ? (allImages || []).filter((i: any) => i.categories?.slug === searchParams.category)
-    : allImages || [];
+  let images = allImages || [];
+
+  if (searchParams.category) {
+    images = images.filter((i: any) => i.categories?.slug === searchParams.category);
+  }
+
+  if (searchParams.q) {
+    const query = searchParams.q.toLowerCase();
+    images = images.filter((i: any) => i.title?.toLowerCase().includes(query));
+  }
 
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto min-h-screen max-w-5xl px-4 py-12 sm:px-8">
-        <p className="font-mono text-xs uppercase tracking-[0.3em] text-brass/70">The visual vault</p>
-        <h1 className="mt-2 font-display text-3xl font-semibold">Images</h1>
-        <p className="mt-2 text-sm text-paper/50">Explore our gallery of images.</p>
+      <main className="mx-auto min-h-screen max-w-5xl px-4 py-12 pb-24 sm:px-8 sm:pb-12">
+        <h1 className="font-display text-3xl font-semibold text-text">Images</h1>
+        <p className="mt-1 text-text-muted text-sm">Browse all uploaded images.</p>
+
+        <div className="mt-6 max-w-md">
+          <Suspense fallback={null}>
+            <SearchBar />
+          </Suspense>
+        </div>
 
         <Suspense fallback={null}>
           <CategoryFilter categories={categories || []} basePath="/images" />
         </Suspense>
 
         {!images.length ? (
-          <div className="mt-16 flex flex-col items-center text-center">
-            <span className="text-4xl">🖼️</span>
-            <p className="mt-4 text-lg font-medium text-paper/70">No images yet</p>
-            <p className="mt-1 text-sm text-paper/40">Check back soon for new uploads.</p>
+          <div className="mt-16 flex flex-col items-center gap-3 text-text-dim">
+            <p className="font-body text-sm">No images yet</p>
           </div>
         ) : (
-          <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
+          <div className="mt-8 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
             {images.map((img: any) => (
               <div
                 key={img.id}
-                className="group relative overflow-hidden rounded-lg border border-line/15 bg-white/[0.02] transition-all hover:-translate-y-0.5 hover:border-brass/50 hover:shadow-[0_8px_30px_rgba(0,0,0,0.35)]"
+                className="bg-surface border border-border rounded-2xl overflow-hidden card-glow group relative"
               >
-                <Link href={hybridPath('/view', img.share_id, img.title)} className="block">
-                  <div className="aspect-square overflow-hidden bg-vellum">
+                <Link href={`/view/${img.share_id}`} className="block">
+                  <div className="aspect-square bg-surface-2">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={`/api/thumb/image/${img.share_id}`}
@@ -66,17 +76,17 @@ export default async function ImagesPage({
                   </div>
                   <div className="p-2.5 pr-9">
                     {img.categories ? (
-                      <span className="mb-1 inline-block rounded-full bg-brass/15 px-2 py-0.5 font-mono text-[9px] uppercase tracking-wider text-brass">
+                      <span className="mb-1 inline-block rounded-full bg-gold/10 text-gold text-[9px] font-medium uppercase tracking-wider">
                         {img.categories.name}
                       </span>
                     ) : null}
-                    <p className="truncate font-body text-xs font-medium text-paper/85 group-hover:text-brass">
+                    <p className="truncate text-text text-xs font-medium group-hover:text-rose-light transition-colors">
                       {img.title}
                     </p>
                   </div>
                 </Link>
                 <ShareButton
-                  shareId={img.share_id}
+                  path={`/view/${img.share_id}`}
                   title={img.title}
                   className="absolute right-2 top-2 h-7 w-7 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
                 />

@@ -17,10 +17,10 @@ export default async function AdminImagesPage() {
 
   return (
     <main className="mx-auto min-h-screen max-w-4xl px-4 py-10 sm:px-8">
-      <Link href="/admin" className="font-mono text-xs uppercase tracking-wider text-velvet-text/40 hover:text-rose-gold">
+      <Link href="/admin" className="font-mono text-xs uppercase tracking-wider text-text-dim hover:text-gold">
         ← Dashboard
       </Link>
-      <h1 className="mt-3 font-display text-3xl font-semibold">Gallery</h1>
+      <h1 className="mt-3 font-display text-3xl font-semibold text-text">Images</h1>
 
       <div className="mt-6">
         <UploadFileForm kind="image" />
@@ -28,9 +28,9 @@ export default async function AdminImagesPage() {
 
       <div className="mt-8">
         {!images?.length ? (
-          <p className="text-sm text-velvet-text/40">No images yet. Add your first one!</p>
+          <p className="text-sm text-text-dim">No images uploaded yet.</p>
         ) : (
-          <div className="divide-y divide-velvet-border/20 rounded-xl border border-velvet-border/30">
+          <div className="divide-y divide-border rounded-xl border border-border bg-surface">
             {images.map((img: any) => (
               <AdminItemRow
                 key={img.id}

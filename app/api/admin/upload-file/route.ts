@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
     if (thumbError) thumbnailPath = null; // non-fatal, just skip the thumbnail
   }
 
-  // Generate a URL-friendly slug from the title
+  // Generate a slug-based share_id
   const shareId = await generateUniqueSlug(title, async (slug) => {
     const { count } = await supabase
       .from('files')

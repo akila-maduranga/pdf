@@ -1,22 +1,28 @@
 import Link from 'next/link';
+import { Suspense } from 'react';
 import { unstable_noStore as noStore } from 'next/cache';
 import { supabaseServer } from '@/lib/supabaseServer';
 import SiteHeader from '@/components/SiteHeader';
+import SearchBar from '@/components/SearchBar';
 import ShareButton from '@/components/ShareButton';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-export default async function CollectionsPage() {
+export default async function CollectionsPage({
+  searchParams,
+}: {
+  searchParams: { q?: string; category?: string };
+}) {
   noStore();
   const supabase = supabaseServer();
 
-  const { data: collections } = await supabase
+  const { data: allCollections } = await supabase
     .from('collections')
     .select('id, title, description, share_id, categories(name)')
     .order('created_at', { ascending: false });
 
-  const collectionIds = (collections || []).map((c: any) => c.id);
+  const collectionIds = (allCollections || []).map((c: any) => c.id);
   const { data: itemCounts } = collectionIds.length
     ? await supabase.from('collection_items').select('collection_id').in('collection_id', collectionIds)
     : { data: [] as any[] };
@@ -26,47 +32,59 @@ export default async function CollectionsPage() {
     countMap[row.collection_id] = (countMap[row.collection_id] || 0) + 1;
   }
 
+  let collections = allCollections || [];
+
+  if (searchParams.category) {
+    collections = collections.filter((c: any) => c.categories?.name?.toLowerCase().replace(/\s+/g, '-') === searchParams.category.toLowerCase());
+  }
+
+  if (searchParams.q) {
+    const query = searchParams.q.toLowerCase();
+    collections = collections.filter((c: any) => c.title?.toLowerCase().includes(query));
+  }
+
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto min-h-screen max-w-5xl px-4 py-12 sm:px-8">
-        <p className="font-mono text-xs uppercase tracking-[0.3em] text-brass/70">Curated series</p>
-        <h1 className="mt-2 font-display text-3xl font-semibold">Collections</h1>
-        <p className="mt-2 max-w-md text-paper/55">
-          Grouped stories, chapters, and series — organized for easy browsing.
-        </p>
+      <main className="mx-auto min-h-screen max-w-5xl px-4 py-12 pb-24 sm:px-8 sm:pb-12">
+        <h1 className="font-display text-3xl font-semibold text-text">Collections</h1>
+        <p className="mt-1 text-text-muted text-sm">Browse curated collections and grouped series.</p>
 
-        {!collections?.length ? (
-          <div className="mt-16 flex flex-col items-center text-center">
-            <span className="text-4xl">📚</span>
-            <p className="mt-4 text-lg font-medium text-paper/70">No collections yet</p>
-            <p className="mt-1 text-sm text-paper/40">Collections will appear here once created.</p>
+        <div className="mt-6 max-w-md">
+          <Suspense fallback={null}>
+            <SearchBar />
+          </Suspense>
+        </div>
+
+        {!collections.length ? (
+          <div className="mt-16 flex flex-col items-center gap-3 text-text-dim">
+            <p className="font-body text-sm">No collections yet</p>
           </div>
         ) : (
-          <div className="mt-8 grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
             {collections.map((c: any) => (
               <div
                 key={c.id}
-                className="group relative overflow-hidden rounded-lg border border-line/15 bg-white/[0.02] p-5 transition-all hover:-translate-y-0.5 hover:border-brass/50 hover:shadow-[0_8px_30px_rgba(0,0,0,0.35)]"
+                className="bg-surface border border-border rounded-2xl p-5 card-glow group relative"
               >
                 <Link href={`/collection/${c.share_id}`} className="block pr-8">
                   {c.categories ? (
-                    <span className="mb-2 inline-block rounded-full bg-brass/15 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-brass">
+                    <span className="mb-2 inline-block rounded-full bg-gold/10 text-gold text-[10px] font-medium uppercase tracking-wider">
                       {c.categories.name}
                     </span>
                   ) : null}
-                  <p className="font-display text-lg font-semibold text-paper/95 group-hover:text-brass">
+                  <p className="font-display text-lg text-text group-hover:text-rose-light transition-colors">
                     {c.title}
                   </p>
                   {c.description ? (
-                    <p className="mt-1.5 line-clamp-2 text-sm text-paper/50">{c.description}</p>
+                    <p className="mt-1.5 line-clamp-2 text-text-muted text-sm">{c.description}</p>
                   ) : null}
-                  <p className="mt-3 font-mono text-xs uppercase tracking-wider text-paper/35">
+                  <p className="mt-3 text-text-dim text-xs">
                     {countMap[c.id] || 0} {countMap[c.id] === 1 ? 'part' : 'parts'}
                   </p>
                 </Link>
                 <ShareButton
-                  shareId={c.share_id}
+                  path={`/collection/${c.share_id}`}
                   title={c.title}
                   className="absolute right-4 top-4 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
                 />

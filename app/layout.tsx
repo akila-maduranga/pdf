@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Walkata — your cozy document corner',
-  description: 'Browse PDFs, images, and collections. A pleasant place to view and share content.',
+  title: 'Walkata',
+  description: 'Documents, images, and collections.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -13,11 +13,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap"
           rel="stylesheet"
         />
       </head>
-      <body className="bg-ink text-paper font-body antialiased selection:bg-brass/30">
+      <body className="bg-bg text-text font-body antialiased min-h-screen">
         {children}
       </body>
     </html>

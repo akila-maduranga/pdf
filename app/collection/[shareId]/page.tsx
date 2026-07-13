@@ -2,7 +2,6 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { unstable_noStore as noStore } from 'next/cache';
 import { supabaseServer } from '@/lib/supabaseServer';
-import { hybridPath } from '@/lib/slugify';
 import SiteHeader from '@/components/SiteHeader';
 import ShareButton from '@/components/ShareButton';
 
@@ -49,62 +48,80 @@ export default async function CollectionPage({ params }: { params: { shareId: st
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto min-h-screen max-w-3xl px-4 py-12 sm:px-8">
-        <Link href="/collections" className="font-mono text-xs uppercase tracking-wider text-paper/40 hover:text-brass">
-          ← Collections
+      <main className="mx-auto min-h-screen max-w-3xl px-4 py-12 pb-24 sm:px-8 sm:pb-12">
+        <Link
+          href="/collections"
+          className="inline-flex items-center gap-1.5 font-body text-sm text-text-dim hover:text-rose-light transition-colors"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          Collections
         </Link>
 
         <div className="mt-4 flex items-start justify-between gap-4">
           <div>
             {collection.categories ? (
-              <span className="mb-2 inline-block rounded-full bg-brass/15 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-brass">
+              <span className="mb-2 inline-block rounded-full bg-rose/10 text-rose-light text-xs font-medium uppercase tracking-wider">
                 {collection.categories.name}
               </span>
             ) : null}
-            <h1 className="font-display text-3xl font-semibold">{collection.title}</h1>
-            {collection.description ? <p className="mt-2 text-paper/60">{collection.description}</p> : null}
+            <h1 className="font-display text-3xl font-semibold text-text">
+              {collection.title}
+            </h1>
+            {collection.description ? (
+              <p className="mt-2 text-text-muted font-body">{collection.description}</p>
+            ) : null}
           </div>
-          <ShareButton shareId={collection.share_id} title={collection.title} />
+          <ShareButton
+            path={`/collection/${collection.share_id}`}
+            title={collection.title}
+            className="shrink-0"
+          />
         </div>
 
-        <p className="mt-6 font-mono text-xs uppercase tracking-wider text-paper/40">
-          {parts.length} {parts.length === 1 ? 'part' : 'parts'}
-        </p>
-
         {!parts.length ? (
-          <div className="mt-8 flex flex-col items-center rounded-lg border border-line/15 bg-white/[0.02] py-12 text-center">
-            <span className="text-3xl">📭</span>
-            <p className="mt-3 text-paper/50">This collection is empty.</p>
-            <p className="mt-1 text-sm text-paper/35">Items will appear here once added.</p>
+          <div className="mt-10 flex flex-col items-center gap-3 text-text-dim">
+            <p className="font-body text-sm">No parts in this collection</p>
           </div>
         ) : (
-          <ol className="mt-4 divide-y divide-line/10 rounded-lg border border-line/15">
+          <ol className="mt-8 space-y-2">
             {parts.map((part, index) => (
               <li key={part.id}>
                 {part.source ? (
                   <Link
-                    href={hybridPath('/view', part.source.share_id, part.source.title)}
-                    className="group flex items-center gap-4 px-4 py-4 transition-colors hover:bg-white/[0.03]"
+                    href={`/view/${part.source.share_id}`}
+                    className="bg-surface border border-border rounded-xl p-4 card-glow group flex items-center gap-4 transition-all"
                   >
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-line/20 font-mono text-xs text-paper/50 group-hover:border-brass group-hover:text-brass">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-rose/10 text-rose-light font-body text-sm font-medium">
                       {index + 1}
                     </span>
                     <span className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-paper/90 group-hover:text-brass">
+                      <p className="truncate text-text font-body text-sm group-hover:text-rose-light transition-colors">
                         {part.source.title}
                       </p>
-                      <span className="font-mono text-[10px] uppercase tracking-wider text-paper/35">
+                      <span className="font-body text-text-dim text-xs uppercase tracking-wider">
                         {part.item_type === 'file' ? 'Document' : 'Image'}
                       </span>
                     </span>
-                    <span className="text-paper/30 group-hover:text-brass">→</span>
+                    <svg
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      className="text-text-dim group-hover:text-rose-light transition-colors shrink-0"
+                    >
+                      <polyline points="9 18 15 12 9 6" />
+                    </svg>
                   </Link>
                 ) : (
-                  <div className="flex items-center gap-4 px-4 py-4 text-paper/35">
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-line/10 font-mono text-xs">
+                  <div className="flex items-center gap-4 border-dashed border-border rounded-xl p-4 text-text-dim">
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-2 font-body text-sm text-text-dim">
                       {index + 1}
                     </span>
-                    <span className="text-sm italic">Item no longer available</span>
+                    <span className="font-body text-sm italic">Part removed</span>
                   </div>
                 )}
               </li>

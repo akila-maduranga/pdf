@@ -2,18 +2,20 @@ import Link from 'next/link';
 
 export default function NotFound() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center px-4 text-center">
-      <span className="text-5xl">🕳️</span>
-      <h1 className="mt-4 font-display text-3xl font-semibold">Oops, nothing here</h1>
-      <p className="mt-2 max-w-xs text-paper/50">
-        This link might be broken, or someone moved the furniture around.
-      </p>
-      <Link
-        href="/"
-        className="mt-6 rounded-lg border border-line/25 px-5 py-2.5 text-sm transition-colors hover:border-brass hover:text-brass"
-      >
-        Back to safety
-      </Link>
+    <main className="min-h-screen flex items-center justify-center px-4 text-center">
+      <div>
+        <p className="font-display text-8xl font-bold text-text-dim">404</p>
+        <h1 className="mt-4 font-display text-2xl text-text">Page not found</h1>
+        <p className="mt-3 text-text-muted font-body">
+          This link may be broken or the content no longer exists.
+        </p>
+        <Link
+          href="/"
+          className="mt-8 inline-block bg-rose text-white rounded-xl px-6 py-3 font-medium font-body btn-press"
+        >
+          Back to Walkata
+        </Link>
+      </div>
     </main>
   );
 }

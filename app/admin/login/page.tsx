@@ -29,10 +29,10 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-4">
-      <form onSubmit={submit} className="w-full max-w-sm rounded-xl border border-velvet-border/30 bg-velvet-surface/30 p-8">
-        <p className="font-mono text-xs uppercase tracking-wider text-rose-gold">Admin access</p>
-        <h1 className="mt-2 font-display text-2xl font-semibold">Welcome back</h1>
+    <main className="flex min-h-screen items-center justify-center px-4 bg-bg">
+      <form onSubmit={submit} className="w-full max-w-sm bg-surface border border-border rounded-2xl p-8">
+        <p className="font-mono text-xs uppercase tracking-wider text-gold">Admin</p>
+        <h1 className="mt-2 font-display text-2xl font-semibold text-text">Sign in</h1>
 
         <input
           type="password"
@@ -40,17 +40,17 @@ export default function AdminLoginPage() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
-          className="mt-6 w-full rounded-lg border border-velvet-border/30 bg-midnight/30 px-3 py-2.5 text-sm text-velvet-text outline-none focus:border-rose-gold"
+          className="mt-6 w-full bg-surface-2 border border-border text-text placeholder:text-text-dim rounded-xl px-3 py-2.5 text-sm outline-none focus:border-gold/40 focus:ring-1 focus:ring-gold/20"
         />
 
-        {error ? <p className="mt-3 text-sm text-wine">{error}</p> : null}
+        {error ? <p className="mt-3 text-danger text-sm">{error}</p> : null}
 
         <button
           type="submit"
           disabled={loading || !password}
-          className="mt-6 w-full rounded-lg bg-rose-gold py-2.5 text-sm font-medium text-velvet-bg transition-opacity hover:bg-rose-gold/90 disabled:opacity-40"
+          className="mt-6 w-full bg-gold text-bg rounded-xl py-2.5 font-semibold hover:bg-gold-light disabled:opacity-40 transition-all btn-press"
         >
-          {loading ? 'Verifying...' : 'Sign in'}
+          {loading ? 'Checking…' : 'Sign in'}
         </button>
       </form>
     </main>
