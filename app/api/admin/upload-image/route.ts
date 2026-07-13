@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer, IMAGE_BUCKET } from '@/lib/supabaseServer';
+import { generateUniqueSlug } from '@/lib/slugify';
 
 export const runtime = 'nodejs';
 
@@ -41,6 +42,15 @@ export async function POST(req: NextRequest) {
     if (thumbError) thumbnailPath = null;
   }
 
+  // Generate a URL-friendly slug from the title
+  const shareId = await generateUniqueSlug(title, async (slug) => {
+    const { count } = await supabase
+      .from('images')
+      .select('*', { count: 'exact', head: true })
+      .eq('share_id', slug);
+    return (count ?? 0) > 0;
+  });
+
   const { data, error: insertError } = await supabase
     .from('images')
     .insert({
@@ -49,6 +59,7 @@ export async function POST(req: NextRequest) {
       storage_path: storagePath,
       thumbnail_path: thumbnailPath,
       category_id: categoryId,
+      share_id: shareId,
     })
     .select('id, share_id')
     .single();

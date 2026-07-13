@@ -17,7 +17,7 @@ create table if not exists files (
   description text,
   storage_path text not null,       -- path inside the private pdf bucket
   thumbnail_path text,              -- path inside the private pdf bucket (image)
-  share_id text unique not null default encode(gen_random_bytes(8), 'hex'),
+  share_id text unique not null default encode(gen_random_bytes(8), 'hex'),  -- overridden with slug on insert
   category_id uuid references categories(id) on delete set null,
   created_at timestamptz not null default now()
 );
@@ -28,7 +28,7 @@ create table if not exists images (
   description text,
   storage_path text not null,       -- path inside the private image bucket
   thumbnail_path text,              -- optional smaller version, falls back to storage_path
-  share_id text unique not null default encode(gen_random_bytes(8), 'hex'),
+  share_id text unique not null default encode(gen_random_bytes(8), 'hex'),  -- overridden with slug on insert
   category_id uuid references categories(id) on delete set null,
   created_at timestamptz not null default now()
 );
@@ -40,7 +40,7 @@ create table if not exists collections (
   id uuid primary key default gen_random_uuid(),
   title text not null,
   description text,
-  share_id text unique not null default encode(gen_random_bytes(8), 'hex'),
+  share_id text unique not null default encode(gen_random_bytes(8), 'hex'),  -- overridden with slug on insert
   category_id uuid references categories(id) on delete set null,
   created_at timestamptz not null default now()
 );

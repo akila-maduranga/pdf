@@ -53,7 +53,7 @@ export default async function AdminItemDetail({
       {item.description ? <p className="mt-2 text-paper/60">{item.description}</p> : null}
 
       <p className="mt-3 font-mono text-xs text-paper/40">
-        Share link: <span className="text-brass">/view/{item.share_id}</span>
+        Share link: <span className="break-all text-brass">/view/{item.share_id}</span>
       </p>
 
       <div className="mt-6">
