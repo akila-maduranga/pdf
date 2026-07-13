@@ -7,6 +7,7 @@ const LINKS = [
   { href: '/files', label: 'Documents' },
   { href: '/images', label: 'Images' },
   { href: '/collections', label: 'Collections' },
+  { href: '/stats', label: 'Stats' },
 ];
 
 export default function SiteHeader() {
@@ -14,26 +15,39 @@ export default function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-20 border-b border-line/10 bg-ink/85 backdrop-blur">
-      <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 sm:px-8">
+      <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-8 sm:py-4">
         <Link href="/" className="flex items-baseline gap-2">
           <span className="font-display text-lg font-semibold tracking-tight text-paper">Walkata</span>
           <span className="hidden font-mono text-[10px] uppercase tracking-[0.25em] text-brass/70 sm:inline">
-            read only
+            look but don&apos;t touch
           </span>
         </Link>
 
-        <nav className="flex items-center gap-1 font-mono text-xs uppercase tracking-wider">
+        <nav className="flex items-center gap-0.5 font-mono text-xs uppercase tracking-wider sm:gap-1">
           {LINKS.map((link) => {
             const active = pathname?.startsWith(link.href);
             return (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`rounded px-3 py-1.5 transition-colors ${
-                  active ? 'bg-brass/15 text-brass' : 'text-paper/55 hover:text-brass'
+                className={`rounded px-2 py-1.5 transition-colors sm:px-3 ${
+                  active
+                    ? 'bg-brass/15 text-brass'
+                    : 'text-paper/55 hover:text-brass'
                 }`}
               >
-                {link.label}
+                {link.label === 'Stats' ? (
+                  <span className="flex items-center gap-1">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="3" y="12" width="4" height="9" rx="1" />
+                      <rect x="10" y="7" width="4" height="14" rx="1" />
+                      <rect x="17" y="3" width="4" height="18" rx="1" />
+                    </svg>
+                    <span className="hidden sm:inline">{link.label}</span>
+                  </span>
+                ) : (
+                  link.label
+                )}
               </Link>
             );
           })}

@@ -33,7 +33,7 @@ export default async function FilesPage({
     <>
       <SiteHeader />
       <main className="mx-auto min-h-screen max-w-5xl px-4 py-12 sm:px-8">
-        <p className="font-mono text-xs uppercase tracking-[0.3em] text-brass/70">Read-only archive</p>
+        <p className="font-mono text-xs uppercase tracking-[0.3em] text-brass/70">The paper stash</p>
         <h1 className="mt-2 font-display text-3xl font-semibold">Documents</h1>
 
         <Suspense fallback={null}>

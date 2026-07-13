@@ -5,30 +5,36 @@ export default function Home() {
     <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-6 py-20 text-center">
       <div className="grain pointer-events-none absolute inset-0" />
       <div className="relative">
-        <p className="font-mono text-xs uppercase tracking-[0.35em] text-brass">Read-only archive</p>
+        <p className="font-mono text-xs uppercase tracking-[0.35em] text-brass">Your cozy little corner</p>
         <h1 className="mt-4 font-display text-5xl font-semibold sm:text-6xl">Walkata</h1>
         <p className="mx-auto mt-4 max-w-md text-paper/60">
-          Documents, images, and the collections that tie them together — kept on the shelf for
-          reading, never for taking.
+          A chill spot for documents, images, and collections — browse all you want,
+          no strings attached.
         </p>
         <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
           <Link
             href="/files"
-            className="rounded border border-line/25 px-6 py-3 font-body text-sm text-paper/85 transition-colors hover:border-brass hover:text-brass"
+            className="group relative overflow-hidden rounded-lg border border-line/25 px-6 py-3 font-body text-sm text-paper/85 transition-colors hover:border-brass hover:text-brass"
           >
-            Browse documents
+            <span className="relative z-10">Browse documents</span>
           </Link>
           <Link
             href="/images"
-            className="rounded border border-line/25 px-6 py-3 font-body text-sm text-paper/85 transition-colors hover:border-brass hover:text-brass"
+            className="rounded-lg border border-line/25 px-6 py-3 font-body text-sm text-paper/85 transition-colors hover:border-brass hover:text-brass"
           >
             Browse images
           </Link>
           <Link
             href="/collections"
-            className="rounded border border-line/25 px-6 py-3 font-body text-sm text-paper/85 transition-colors hover:border-brass hover:text-brass"
+            className="rounded-lg border border-line/25 px-6 py-3 font-body text-sm text-paper/85 transition-colors hover:border-brass hover:text-brass"
           >
             Browse collections
+          </Link>
+          <Link
+            href="/stats"
+            className="rounded-lg border border-brass/30 bg-brass/10 px-6 py-3 font-body text-sm text-brass transition-colors hover:bg-brass/20"
+          >
+            Peek at stats
           </Link>
         </div>
       </div>

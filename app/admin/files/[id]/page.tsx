@@ -61,15 +61,15 @@ export default async function AdminItemDetail({
       </div>
 
       <div className="mt-8 grid grid-cols-3 gap-4">
-        <Stat label="Total views" value={pageViews + linkClicks} />
-        <Stat label="Gallery views" value={pageViews} />
-        <Stat label="Link clicks" value={linkClicks} />
+        <Stat label="Total eyeballs" value={pageViews + linkClicks} />
+        <Stat label="Gallery peeks" value={pageViews} />
+        <Stat label="Shared links" value={linkClicks} />
       </div>
 
       <div className="mt-8">
-        <h2 className="font-mono text-xs uppercase tracking-wider text-paper/40">Reactions</h2>
+        <h2 className="font-mono text-xs uppercase tracking-wider text-paper/40">Vibes</h2>
         {!Object.keys(reactionCounts).length ? (
-          <p className="mt-3 text-sm text-paper/40">No reactions yet.</p>
+          <p className="mt-3 text-sm text-paper/40">Crickets so far.</p>
         ) : (
           <div className="mt-3 flex flex-wrap gap-3">
             {Object.entries(reactionCounts).map(([emoji, count]) => (
@@ -82,9 +82,9 @@ export default async function AdminItemDetail({
       </div>
 
       <div className="mt-8">
-        <h2 className="font-mono text-xs uppercase tracking-wider text-paper/40">Recent activity</h2>
+        <h2 className="font-mono text-xs uppercase tracking-wider text-paper/40">Recent drops</h2>
         {!events?.length ? (
-          <p className="mt-3 text-sm text-paper/40">Nothing recorded yet.</p>
+          <p className="mt-3 text-sm text-paper/40">Tumbleweeds...</p>
         ) : (
           <div className="mt-3 divide-y divide-line/10 rounded border border-line/15">
             {events.slice(0, 25).map((e, i) => (

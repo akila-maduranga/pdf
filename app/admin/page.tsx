@@ -80,15 +80,15 @@ export default async function AdminDashboard() {
       <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-5">
         <Stat label="Documents" value={fileCount ?? 0} />
         <Stat label="Images" value={imageCount ?? 0} />
-        <Stat label="Total views" value={totalViews} />
-        <Stat label="Link clicks" value={totalLinkClicks} />
-        <Stat label="Reactions" value={totalReactions} />
+        <Stat label="Total eyeballs" value={totalViews} />
+        <Stat label="Shared links" value={totalLinkClicks} />
+        <Stat label="Vibes given" value={totalReactions} />
       </div>
 
       <div className="mt-10">
-        <h2 className="font-mono text-xs uppercase tracking-wider text-paper/40">Most viewed</h2>
+        <h2 className="font-mono text-xs uppercase tracking-wider text-paper/40">Crowd favorites</h2>
         {!topItems.length ? (
-          <p className="mt-3 text-sm text-paper/40">No views recorded yet.</p>
+          <p className="mt-3 text-sm text-paper/40">No one&apos;s looked yet. Awkward.</p>
         ) : (
           <div className="mt-3 divide-y divide-line/10 rounded border border-line/15">
             {topItems.map((item) => (

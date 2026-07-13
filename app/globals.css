@@ -27,3 +27,66 @@ html {
   background-image: radial-gradient(rgba(246, 243, 236, 0.035) 1px, transparent 1px);
   background-size: 3px 3px;
 }
+
+/* Quirky hover bounce for cards */
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-1deg); }
+  75% { transform: rotate(1deg); }
+}
+
+/* Smooth number count-up feel */
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fadeSlideUp 0.4s ease-out;
+}
+
+/* Pulse glow for the live indicator */
+@keyframes livePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+}
+
+.animate-live-pulse {
+  animation: livePulse 2s ease-in-out infinite;
+}
+
+/* Better scrollbar on dark bg */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(216, 208, 189, 0.15);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(216, 208, 189, 0.3);
+}
+
+/* Touch-friendly tap highlight */
+@media (hover: none) {
+  a, button {
+    -webkit-tap-highlight-color: rgba(184, 147, 74, 0.15);
+  }
+}
+
+/* Mobile bottom safe area for sticky controls */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}

@@ -71,7 +71,7 @@ export default async function CollectionPage({ params }: { params: { shareId: st
         </p>
 
         {!parts.length ? (
-          <p className="mt-6 text-paper/50">Nothing has been added to this collection yet.</p>
+          <p className="mt-6 text-paper/50">This collection is empty. Someone forgot to add stuff!</p>
         ) : (
           <ol className="mt-4 divide-y divide-line/10 rounded-lg border border-line/15">
             {parts.map((part, index) => (
@@ -99,7 +99,7 @@ export default async function CollectionPage({ params }: { params: { shareId: st
                     <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-line/10 font-mono text-xs">
                       {index + 1}
                     </span>
-                    <span className="text-sm italic">Part removed</span>
+                    <span className="text-sm italic">Poof — gone</span>
                   </div>
                 )}
               </li>

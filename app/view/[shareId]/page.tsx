@@ -92,7 +92,7 @@ export default async function ViewPage({ params }: { params: { shareId: string }
   return (
     <>
       <SiteHeader />
-      <main className="mx-auto min-h-screen max-w-4xl px-4 py-10 sm:px-8">
+      <main className="mx-auto min-h-screen max-w-4xl px-4 py-6 pb-24 sm:px-8 sm:py-10 sm:pb-10">
         <ViewOnlyGuard />
         <ViewTracker itemType={type} itemId={item.id} />
 
@@ -101,7 +101,7 @@ export default async function ViewPage({ params }: { params: { shareId: string }
         </Link>
 
         {collectionContext ? (
-          <div className="mt-4 rounded-lg border border-line/15 bg-white/[0.02] px-4 py-3">
+          <div className="mt-3 rounded-lg border border-line/15 bg-white/[0.02] px-4 py-3">
             <Link
               href={`/collection/${collectionContext.collectionShareId}`}
               className="font-mono text-[11px] uppercase tracking-wider text-brass hover:underline"
@@ -129,19 +129,19 @@ export default async function ViewPage({ params }: { params: { shareId: string }
         ) : null}
 
         <div className="mt-4 flex items-start justify-between gap-4">
-          <div>
+          <div className="min-w-0 flex-1">
             {item.categories ? (
               <span className="mb-2 inline-block rounded-full bg-brass/15 px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-brass">
                 {item.categories.name}
               </span>
             ) : null}
-            <h1 className="font-display text-2xl font-semibold text-paper sm:text-3xl">{item.title}</h1>
-            {item.description ? <p className="mt-2 text-paper/60">{item.description}</p> : null}
+            <h1 className="font-display text-xl font-semibold text-paper sm:text-3xl">{item.title}</h1>
+            {item.description ? <p className="mt-2 text-sm text-paper/60">{item.description}</p> : null}
           </div>
           <ShareButton path={`/view/${item.share_id}`} title={item.title} variant="button" className="shrink-0" />
         </div>
 
-        <div className="mt-8">
+        <div className="mt-6 sm:mt-8">
           {type === 'file' ? (
             <PdfViewer shareId={item.share_id} />
           ) : (
@@ -149,14 +149,12 @@ export default async function ViewPage({ params }: { params: { shareId: string }
           )}
         </div>
 
-        <div className="mt-8 border-t border-line/10 pt-6">
-          <p className="mb-3 font-mono text-xs uppercase tracking-wider text-paper/40">React</p>
+        <div className="mt-6 border-t border-line/10 pt-6 sm:mt-8">
+          <p className="mb-3 font-mono text-xs uppercase tracking-wider text-paper/40">
+            How&apos;s this making you feel?
+          </p>
           <ReactionBar itemType={type} itemId={item.id} />
         </div>
-
-        <p className="mt-10 text-center font-mono text-[11px] uppercase tracking-wider text-paper/25">
-          View only · downloading is disabled
-        </p>
       </main>
     </>
   );

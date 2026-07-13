@@ -31,8 +31,8 @@ export default function AdminLoginPage() {
   return (
     <main className="flex min-h-screen items-center justify-center px-4">
       <form onSubmit={submit} className="w-full max-w-sm rounded border border-line/15 bg-white/[0.02] p-8">
-        <p className="font-mono text-xs uppercase tracking-wider text-brass">Admin</p>
-        <h1 className="mt-2 font-display text-2xl font-semibold">Sign in</h1>
+        <p className="font-mono text-xs uppercase tracking-wider text-brass">Secret entrance</p>
+        <h1 className="mt-2 font-display text-2xl font-semibold">Who goes there?</h1>
 
         <input
           type="password"
@@ -50,7 +50,7 @@ export default function AdminLoginPage() {
           disabled={loading || !password}
           className="mt-6 w-full rounded bg-brass py-2.5 text-sm font-medium text-ink transition-opacity hover:opacity-90 disabled:opacity-40"
         >
-          {loading ? 'Checking…' : 'Sign in'}
+          {loading ? 'Hold on...' : 'Let me in'}
         </button>
       </form>
     </main>

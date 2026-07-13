@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Walkata — read-only document room',
-  description: 'View-only PDFs, images, and collections.',
+  title: 'Walkata — your cozy document corner',
+  description: 'Browse PDFs, images, and collections. Just vibes, no downloads.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
