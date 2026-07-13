@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  scroll-behavior: smooth;
+}
+
+::selection {
+  background-color: rgba(184, 147, 74, 0.3);
+}
+
 @media print {
   body {
     display: none !important;

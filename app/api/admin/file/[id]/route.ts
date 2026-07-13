@@ -42,6 +42,25 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
   });
 }
 
+export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
+  const { searchParams } = new URL(req.url);
+  const type = searchParams.get('type') === 'image' ? 'image' : 'file';
+  const table = type === 'file' ? 'files' : 'images';
+
+  const body = await req.json().catch(() => null);
+  if (!body) return NextResponse.json({ error: 'Bad request' }, { status: 400 });
+
+  const update: Record<string, unknown> = {};
+  if (typeof body.title === 'string') update.title = body.title.trim();
+  if (typeof body.description === 'string') update.description = body.description.trim();
+  if ('categoryId' in body) update.category_id = body.categoryId || null;
+
+  const supabase = supabaseServer();
+  const { error } = await supabase.from(table).update(update).eq('id', params.id);
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ ok: true });
+}
+
 export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   const { searchParams } = new URL(req.url);
   const type = searchParams.get('type') === 'image' ? 'image' : 'file';

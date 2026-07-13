@@ -2,6 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import CategorySelect from './CategorySelect';
 
 type Props = {
   kind: 'file' | 'image';
@@ -74,6 +75,9 @@ export default function UploadFileForm({ kind }: Props) {
             accept="image/*"
             className="mt-1 w-full text-xs text-paper/70 file:mr-3 file:rounded file:border-0 file:bg-brass/20 file:px-3 file:py-1.5 file:text-xs file:text-brass"
           />
+        </div>
+        <div className="sm:col-span-2">
+          <CategorySelect />
         </div>
       </div>
 

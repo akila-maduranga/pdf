@@ -12,7 +12,7 @@ export default async function AdminImagesPage() {
   const supabase = supabaseServer();
   const { data: images } = await supabase
     .from('images')
-    .select('id, title, share_id')
+    .select('id, title, share_id, categories(name)')
     .order('created_at', { ascending: false });
 
   return (
@@ -31,8 +31,15 @@ export default async function AdminImagesPage() {
           <p className="text-sm text-paper/40">No images uploaded yet.</p>
         ) : (
           <div className="divide-y divide-line/10 rounded border border-line/15">
-            {images.map((img) => (
-              <AdminItemRow key={img.id} id={img.id} type="image" title={img.title} shareId={img.share_id} />
+            {images.map((img: any) => (
+              <AdminItemRow
+                key={img.id}
+                id={img.id}
+                type="image"
+                title={img.title}
+                shareId={img.share_id}
+                categoryName={img.categories?.name}
+              />
             ))}
           </div>
         )}

@@ -12,7 +12,7 @@ export default async function AdminFilesPage() {
   const supabase = supabaseServer();
   const { data: files } = await supabase
     .from('files')
-    .select('id, title, share_id')
+    .select('id, title, share_id, categories(name)')
     .order('created_at', { ascending: false });
 
   return (
@@ -31,8 +31,15 @@ export default async function AdminFilesPage() {
           <p className="text-sm text-paper/40">No documents uploaded yet.</p>
         ) : (
           <div className="divide-y divide-line/10 rounded border border-line/15">
-            {files.map((f) => (
-              <AdminItemRow key={f.id} id={f.id} type="file" title={f.title} shareId={f.share_id} />
+            {files.map((f: any) => (
+              <AdminItemRow
+                key={f.id}
+                id={f.id}
+                type="file"
+                title={f.title}
+                shareId={f.share_id}
+                categoryName={f.categories?.name}
+              />
             ))}
           </div>
         )}

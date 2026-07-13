@@ -9,6 +9,7 @@ export async function POST(req: NextRequest) {
   const description = String(form.get('description') || '').trim();
   const file = form.get('file') as File | null;
   const thumbnail = form.get('thumbnail') as File | null;
+  const categoryId = (String(form.get('categoryId') || '').trim() || null) as string | null;
 
   if (!title || !file) {
     return NextResponse.json({ error: 'Title and image file are required' }, { status: 400 });
@@ -42,7 +43,13 @@ export async function POST(req: NextRequest) {
 
   const { data, error: insertError } = await supabase
     .from('images')
-    .insert({ title, description, storage_path: storagePath, thumbnail_path: thumbnailPath })
+    .insert({
+      title,
+      description,
+      storage_path: storagePath,
+      thumbnail_path: thumbnailPath,
+      category_id: categoryId,
+    })
     .select('id, share_id')
     .single();
 

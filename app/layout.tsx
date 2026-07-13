@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Vault — read-only document room',
-  description: 'View-only PDFs and images.',
+  title: 'Walkata — read-only document room',
+  description: 'View-only PDFs, images, and collections.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

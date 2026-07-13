@@ -1,9 +1,13 @@
-# Vault — view-only PDF & image site
+# Walkata — view-only PDF & image site
 
 Next.js 14 app. PDFs render page-by-page to a `<canvas>` (not the browser's
 native PDF viewer, which has its own download button). Images and PDFs are
 streamed through server routes from **private** Supabase Storage buckets —
 the browser never gets a direct, cacheable link to the original file.
+
+Documents and images can be tagged with **categories**, grouped into
+**collections** (chapters, issues, a photo series — many parts of one
+story, in order), and every item has a one-tap **share** button.
 
 **Read this once:** nothing served over the web can be made truly
 undownloadable — a screenshot always works, and anyone using browser dev
@@ -16,6 +20,8 @@ deterrent, not a DRM guarantee.
 
 1. Create a project at [supabase.com](https://supabase.com).
 2. **SQL editor** → paste and run `supabase/schema.sql` from this repo.
+   (If you're upgrading an existing Walkata/Vault install, this file is
+   safe to re-run — it only creates missing tables/columns.)
 3. **Storage** → create two buckets, both set to **Private**:
    - `pdf-files`
    - `images`
@@ -67,14 +73,39 @@ as admin.
 
 ## How it's organized
 
-- `/` `/files` `/images` — public browsing, no login required.
-- `/view/[shareId]` — the actual view-only viewer + reactions. This is also
-  the shareable link (copy it from the admin panel).
+- `/`, `/files`, `/images`, `/collections` — public browsing, no login
+  required. `/files` and `/images` can be filtered by category.
+- `/view/[shareId]` — the actual view-only viewer + reactions + share
+  button. This is also the shareable link (copy it from the admin panel,
+  or tap Share on any card/page). If the item is part of a collection, this
+  page also shows "Part X of Y" navigation to the next/previous part.
+- `/collection/[shareId]` — the shareable, ordered table of contents for a
+  collection.
 - `/admin/login` — single-password admin login.
 - `/admin` — dashboard: total documents/images, total views, link clicks,
   reactions, most-viewed list.
 - `/admin/files`, `/admin/images` — upload new files (with optional
-  thumbnail), copy share links, view per-item stats, delete.
+  thumbnail and category), copy share links, view per-item stats, delete.
+- `/admin/categories` — create/delete categories used to tag documents,
+  images, and collections.
+- `/admin/collections` — create collections and, inside each one, add
+  documents/images as ordered parts, reorder them, or remove them.
+
+### Categories
+
+A category is just a name + slug (`categories` table). Files, images, and
+collections each have an optional `category_id`. Assign one at upload time,
+or later from an item's detail page in the admin. The public `/files` and
+`/images` galleries show category filter pills whenever any category exists.
+
+### Collections
+
+A collection groups existing files/images as ordered "parts" of one story
+(`collections` + `collection_items` tables, ordered by `part_number`). An
+item can belong to at most one collection. Add parts from
+`/admin/collections/[id]`, reorder with the ↑/↓ buttons, and share the
+collection's own link (`/collection/[shareId]`) or link directly to a part
+(`/view/[shareId]`), which will show prev/next navigation within the story.
 
 ### Views vs. link clicks
 
@@ -87,6 +118,7 @@ it's counted as a **link click**. The dashboard shows both, plus the total.
 
 - Swap the emoji set in `components/ReactionBar.tsx`.
 - PDF render quality/zoom defaults live in `components/PdfViewer.tsx`.
+- Site name and nav links live in `components/SiteHeader.tsx`.
 - To add real user accounts instead of anonymous device IDs, swap
   `lib/deviceId.ts` for your auth of choice — the `reactions`/`events` tables
   already key on an arbitrary `device_id` string.

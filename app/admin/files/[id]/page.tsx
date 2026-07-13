@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { unstable_noStore as noStore } from 'next/cache';
 import { supabaseServer } from '@/lib/supabaseServer';
 import { notFound } from 'next/navigation';
+import ItemCategoryEditor from '@/components/ItemCategoryEditor';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -54,6 +55,10 @@ export default async function AdminItemDetail({
       <p className="mt-3 font-mono text-xs text-paper/40">
         Share link: <span className="text-brass">/view/{item.share_id}</span>
       </p>
+
+      <div className="mt-6">
+        <ItemCategoryEditor itemId={item.id} type={type} initialCategoryId={item.category_id} />
+      </div>
 
       <div className="mt-8 grid grid-cols-3 gap-4">
         <Stat label="Total views" value={pageViews + linkClicks} />

@@ -2,7 +2,7 @@
 // Uses Web Crypto (SubtleCrypto) so it works in both the Node runtime
 // (API routes) and the Edge runtime (middleware).
 
-const COOKIE_NAME = 'vr_admin_session';
+const COOKIE_NAME = 'walkata_admin_session';
 const MAX_AGE_SECONDS = 60 * 60 * 12; // 12 hours
 
 function getSecret() {

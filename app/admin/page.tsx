@@ -62,12 +62,18 @@ export default async function AdminDashboard() {
         <LogoutButton />
       </div>
 
-      <nav className="mt-6 flex gap-3">
+      <nav className="mt-6 flex flex-wrap gap-3">
         <Link href="/admin/files" className="rounded border border-line/20 px-4 py-2 text-sm hover:border-brass hover:text-brass">
           Manage documents
         </Link>
         <Link href="/admin/images" className="rounded border border-line/20 px-4 py-2 text-sm hover:border-brass hover:text-brass">
           Manage images
+        </Link>
+        <Link href="/admin/collections" className="rounded border border-line/20 px-4 py-2 text-sm hover:border-brass hover:text-brass">
+          Manage collections
+        </Link>
+        <Link href="/admin/categories" className="rounded border border-line/20 px-4 py-2 text-sm hover:border-brass hover:text-brass">
+          Manage categories
         </Link>
       </nav>
 
