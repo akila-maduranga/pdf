@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 
 type Props = {
   shareId: string;
@@ -11,18 +11,23 @@ export default function ImageViewer({ shareId, alt }: Props) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  const handleFullscreenChange = useCallback(() => {
+    setIsFullscreen(!!document.fullscreenElement);
+  }, []);
+
+  useEffect(() => {
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, [handleFullscreenChange]);
+
   function toggleFullscreen() {
     if (!containerRef.current) return;
 
     if (!document.fullscreenElement) {
-      containerRef.current.requestFullscreen().then(() => setIsFullscreen(true)).catch(() => {});
+      containerRef.current.requestFullscreen().catch(() => {});
     } else {
-      document.exitFullscreen().then(() => setIsFullscreen(false)).catch(() => {});
+      document.exitFullscreen().catch(() => {});
     }
-  }
-
-  function onFullscreenChange() {
-    setIsFullscreen(!!document.fullscreenElement);
   }
 
   return (
@@ -30,7 +35,6 @@ export default function ImageViewer({ shareId, alt }: Props) {
       <div
         ref={containerRef}
         className="no-select flex w-full items-center justify-center overflow-auto rounded-lg border border-line/15 bg-black/20 p-1 sm:p-4"
-        onFullscreenChange={onFullscreenChange}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
