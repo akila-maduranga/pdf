@@ -17,10 +17,10 @@ export default async function AdminFilesPage() {
 
   return (
     <main className="mx-auto min-h-screen max-w-4xl px-4 py-10 sm:px-8">
-      <Link href="/admin" className="font-mono text-xs uppercase tracking-wider text-paper/40 hover:text-brass">
-        ← Control room
+      <Link href="/admin" className="font-mono text-xs uppercase tracking-wider text-velvet-text/40 hover:text-rose-gold">
+        ← Dashboard
       </Link>
-      <h1 className="mt-3 font-display text-3xl font-semibold">The paper stash</h1>
+      <h1 className="mt-3 font-display text-3xl font-semibold">Stories</h1>
 
       <div className="mt-6">
         <UploadFileForm kind="file" />
@@ -28,9 +28,9 @@ export default async function AdminFilesPage() {
 
       <div className="mt-8">
         {!files?.length ? (
-          <p className="text-sm text-paper/40">Shelf&apos;s empty. Upload something!</p>
+          <p className="text-sm text-velvet-text/40">No stories yet. Upload your first one!</p>
         ) : (
-          <div className="divide-y divide-line/10 rounded border border-line/15">
+          <div className="divide-y divide-velvet-border/20 rounded-xl border border-velvet-border/30">
             {files.map((f: any) => (
               <AdminItemRow
                 key={f.id}
