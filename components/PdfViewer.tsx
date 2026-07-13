@@ -2,10 +2,12 @@
 
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
-import 'react-pdf/dist/Page/AnnotationLayer.css';
-import 'react-pdf/dist/Page/TextLayer.css';
 
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+// Use react-pdf's bundled pdfjs version (v5) for the worker — NOT the root
+// pdfjs-dist v3 which is incompatible.
+if (typeof window !== 'undefined') {
+  pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`;
+}
 
 type Props = {
   shareId: string;
@@ -24,32 +26,31 @@ export default function PdfViewer({ shareId }: Props) {
   function onDocumentLoadSuccess({ numPages }: { numPages: number }) {
     setNumPages(numPages);
     setStatus('ready');
-    // Fit to width after render
+    // Fit to width after render — use window width for reliability
     requestAnimationFrame(() => {
-      if (containerRef.current) {
-        const w = containerRef.current.clientWidth - 16;
-        setScale(w / 612); // 612 is standard PDF width at scale 1
-      }
+      const w = window.innerWidth - 48; // 32px page padding + 16px container inner
+      setScale(w / 612); // 612 is standard PDF width at scale 1
     });
   }
 
-  function onDocumentLoadError() {
+  function onDocumentLoadError(err: unknown) {
+    console.error('PDF load error:', err);
     setStatus('error');
   }
 
   // Re-fit on resize
   useEffect(() => {
     function handleResize() {
-      if (containerRef.current) {
-        const w = containerRef.current.clientWidth - 16;
-        setScale(w / 612);
-      }
+      const w = window.innerWidth - 48;
+      setScale(w / 612);
     }
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Passive touch listeners for swipe page flip — never blocks scrolling
+  // Passive native touch listeners for horizontal swipe page flip.
+  // Using { passive: true } lets the browser handle vertical scrolling natively
+  // while JS only reads coordinates to detect horizontal swipes.
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -63,6 +64,7 @@ export default function PdfViewer({ shareId }: Props) {
       if (touchStartX.current === null || touchStartY.current === null) return;
       const dx = e.touches[0].clientX - touchStartX.current;
       const dy = e.touches[0].clientY - touchStartY.current;
+      // Only mark as horizontal swipe if dx clearly dominates
       if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 20) {
         isSwiping.current = true;
       }
@@ -96,16 +98,24 @@ export default function PdfViewer({ shareId }: Props) {
   }, [numPages]);
 
   const fitToWidth = useCallback(() => {
-    if (containerRef.current) {
-      const w = containerRef.current.clientWidth - 16;
-      setScale(w / 612);
-    }
+    const w = window.innerWidth - 48;
+    setScale(w / 612);
   }, []);
 
   if (status === 'error') {
     return (
       <div className="flex h-64 flex-col items-center justify-center gap-3 text-text-muted">
         <p className="font-body text-sm">Couldn&apos;t load this file.</p>
+        <button
+          onClick={() => {
+            setStatus('loading');
+            // Force re-render by toggling a key-like state
+            setScale((s) => s);
+          }}
+          className="mt-1 rounded-lg bg-rose/10 px-4 py-2 text-xs font-body text-rose-light hover:bg-rose/20 transition-colors"
+        >
+          Try again
+        </button>
       </div>
     );
   }
@@ -115,6 +125,7 @@ export default function PdfViewer({ shareId }: Props) {
       <div
         ref={containerRef}
         className="relative w-full rounded-xl border border-border bg-surface p-2 shadow-lg sm:p-4"
+        style={{ touchAction: 'pan-y pinch-zoom' }}
       >
         {status === 'loading' && (
           <div className="flex h-64 flex-col items-center justify-center gap-3 text-text-muted">
