@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseServer, PDF_BUCKET } from '@/lib/supabaseServer';
+import { supabaseServer } from '@/lib/supabaseServer';
+import { fetchStored } from '@/lib/r2';
 
 export const runtime = 'nodejs';
 
@@ -16,24 +17,20 @@ export async function GET(req: NextRequest, { params }: { params: { shareId: str
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
 
-  const { data: blob, error: dlError } = await supabase.storage
-    .from(PDF_BUCKET)
-    .download(file.storage_path);
-
-  if (dlError || !blob) {
+  // Fetched server-side from Cloudflare R2 so the browser never sees the R2 URL.
+  const obj = await fetchStored(file.storage_path, 'file').catch(() => null);
+  if (!obj || !obj.body) {
     return NextResponse.json({ error: 'Could not load file' }, { status: 404 });
   }
 
-  const arrayBuffer = await blob.arrayBuffer();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/pdf',
+    // inline (never attachment) so the browser never offers a "Save As" prompt of its own
+    'Content-Disposition': 'inline',
+    'Cache-Control': 'no-store, no-cache, must-revalidate',
+    'X-Content-Type-Options': 'nosniff',
+  };
+  if (obj.contentLength) headers['Content-Length'] = obj.contentLength;
 
-  return new NextResponse(arrayBuffer, {
-    status: 200,
-    headers: {
-      'Content-Type': 'application/pdf',
-      // inline (never attachment) so the browser never offers a "Save As" prompt of its own
-      'Content-Disposition': 'inline',
-      'Cache-Control': 'no-store, no-cache, must-revalidate',
-      'X-Content-Type-Options': 'nosniff',
-    },
-  });
+  return new NextResponse(obj.body, { status: 200, headers });
 }
