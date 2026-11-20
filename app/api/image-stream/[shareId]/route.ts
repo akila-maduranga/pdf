@@ -1,21 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseServer, IMAGE_BUCKET } from '@/lib/supabaseServer';
+import { supabaseServer } from '@/lib/supabaseServer';
+import { fetchStored, imageTypeFor } from '@/lib/r2';
 
 export const runtime = 'nodejs';
-
-function contentTypeFor(path: string) {
-  const ext = path.split('.').pop()?.toLowerCase();
-  switch (ext) {
-    case 'png':
-      return 'image/png';
-    case 'webp':
-      return 'image/webp';
-    case 'gif':
-      return 'image/gif';
-    default:
-      return 'image/jpeg';
-  }
-}
 
 export async function GET(req: NextRequest, { params }: { params: { shareId: string } }) {
   const supabase = supabaseServer();
@@ -30,23 +17,19 @@ export async function GET(req: NextRequest, { params }: { params: { shareId: str
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
 
-  const { data: blob, error: dlError } = await supabase.storage
-    .from(IMAGE_BUCKET)
-    .download(image.storage_path);
-
-  if (dlError || !blob) {
+  // Fetched server-side from Cloudflare R2 so the browser never sees the R2 URL.
+  const obj = await fetchStored(image.storage_path, 'image').catch(() => null);
+  if (!obj || !obj.body) {
     return NextResponse.json({ error: 'Could not load image' }, { status: 404 });
   }
 
-  const arrayBuffer = await blob.arrayBuffer();
+  const headers: Record<string, string> = {
+    'Content-Type': imageTypeFor(image.storage_path, obj.contentType),
+    'Content-Disposition': 'inline',
+    'Cache-Control': 'no-store, no-cache, must-revalidate',
+    'X-Content-Type-Options': 'nosniff',
+  };
+  if (obj.contentLength) headers['Content-Length'] = obj.contentLength;
 
-  return new NextResponse(arrayBuffer, {
-    status: 200,
-    headers: {
-      'Content-Type': contentTypeFor(image.storage_path),
-      'Content-Disposition': 'inline',
-      'Cache-Control': 'no-store, no-cache, must-revalidate',
-      'X-Content-Type-Options': 'nosniff',
-    },
-  });
+  return new NextResponse(obj.body, { status: 200, headers });
 }
