@@ -1,15 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabaseServer, PDF_BUCKET, IMAGE_BUCKET } from '@/lib/supabaseServer';
+import { supabaseServer } from '@/lib/supabaseServer';
+import { fetchStored, imageTypeFor } from '@/lib/r2';
 
 export const runtime = 'nodejs';
-
-function contentTypeFor(path: string) {
-  const ext = path.split('.').pop()?.toLowerCase();
-  if (ext === 'png') return 'image/png';
-  if (ext === 'webp') return 'image/webp';
-  if (ext === 'gif') return 'image/gif';
-  return 'image/jpeg';
-}
 
 export async function GET(
   req: NextRequest,
@@ -22,7 +15,6 @@ export async function GET(
 
   const supabase = supabaseServer();
   const table = type === 'file' ? 'files' : 'images';
-  const bucket = type === 'file' ? PDF_BUCKET : IMAGE_BUCKET;
 
   const { data: row, error } = await supabase
     .from(table)
@@ -41,16 +33,15 @@ export async function GET(
     return NextResponse.json({ error: 'No thumbnail' }, { status: 404 });
   }
 
-  const { data: blob, error: dlError } = await supabase.storage.from(bucket).download(path);
-  if (dlError || !blob) {
+  const obj = await fetchStored(path, type).catch(() => null);
+  if (!obj || !obj.body) {
     return NextResponse.json({ error: 'No thumbnail' }, { status: 404 });
   }
 
-  const arrayBuffer = await blob.arrayBuffer();
-  return new NextResponse(arrayBuffer, {
+  return new NextResponse(obj.body, {
     status: 200,
     headers: {
-      'Content-Type': contentTypeFor(path),
+      'Content-Type': imageTypeFor(path, obj.contentType),
       'Cache-Control': 'public, max-age=300',
     },
   });
