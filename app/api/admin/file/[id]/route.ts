@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseServer, PDF_BUCKET, IMAGE_BUCKET } from '@/lib/supabaseServer';
+import { isRemoteUrl } from '@/lib/r2';
 
 export const runtime = 'nodejs';
 
@@ -71,7 +72,11 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   const { data: item } = await supabase.from(table).select('storage_path, thumbnail_path').eq('id', params.id).single();
 
   if (item) {
-    const paths = [item.storage_path, item.thumbnail_path].filter(Boolean) as string[];
+    // R2 objects are referenced by URL and are not deleted here (this app has no
+    // R2 credentials). Only legacy Supabase Storage paths are removed.
+    const paths = [item.storage_path, item.thumbnail_path].filter(
+      (p) => !!p && !isRemoteUrl(p)
+    ) as string[];
     if (paths.length) await supabase.storage.from(bucket).remove(paths);
   }
 
