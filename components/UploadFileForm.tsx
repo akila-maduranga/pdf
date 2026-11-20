@@ -64,7 +64,7 @@ export default function UploadFileForm({ kind }: Props) {
       router.refresh();
     } else {
       const data = await res.json().catch(() => ({}));
-      setError(data.error || 'Upload failed');
+      setError(data.error || 'Could not add item');
     }
   }
 
@@ -175,23 +175,29 @@ export default function UploadFileForm({ kind }: Props) {
             rows={2}
             className="rounded-lg bg-surface-2 border border-border px-3 py-2 text-sm text-text placeholder:text-text-dim outline-none focus:border-rose/40 focus:ring-1 focus:ring-rose/20 transition-all sm:col-span-2 resize-none"
           />
-          <div>
-            <label className="block text-xs text-text-dim mb-1">{kind === 'file' ? 'PDF file' : 'Image file'}</label>
+          <div className="sm:col-span-2">
+            <label className="block text-xs text-text-dim mb-1">
+              {kind === 'file' ? 'PDF URL (Cloudflare R2)' : 'Image URL (Cloudflare R2)'}
+            </label>
             <input
-              type="file"
-              name="file"
+              type="url"
+              name="fileUrl"
               required
-              accept={kind === 'file' ? 'application/pdf' : 'image/*'}
-              className="w-full text-xs text-text-muted file:mr-3 file:rounded-lg file:border-0 file:bg-rose/15 file:px-3 file:py-1.5 file:text-xs file:text-rose-light file:font-medium"
+              placeholder={
+                kind === 'file'
+                  ? 'https://pub-xxxx.r2.dev/document.pdf'
+                  : 'https://pub-xxxx.r2.dev/photo.jpg'
+              }
+              className="w-full rounded-lg bg-surface-2 border border-border px-3 py-2 text-sm text-text placeholder:text-text-dim outline-none focus:border-rose/40 focus:ring-1 focus:ring-rose/20 transition-all"
             />
           </div>
-          <div>
-            <label className="block text-xs text-text-dim mb-1">Thumbnail (optional)</label>
+          <div className="sm:col-span-2">
+            <label className="block text-xs text-text-dim mb-1">Thumbnail URL (optional)</label>
             <input
-              type="file"
-              name="thumbnail"
-              accept="image/*"
-              className="w-full text-xs text-text-muted file:mr-3 file:rounded-lg file:border-0 file:bg-rose/15 file:px-3 file:py-1.5 file:text-xs file:text-rose-light file:font-medium"
+              type="url"
+              name="thumbnailUrl"
+              placeholder="https://pub-xxxx.r2.dev/thumb.jpg"
+              className="w-full rounded-lg bg-surface-2 border border-border px-3 py-2 text-sm text-text placeholder:text-text-dim outline-none focus:border-rose/40 focus:ring-1 focus:ring-rose/20 transition-all"
             />
           </div>
           <div className="sm:col-span-2">
@@ -206,7 +212,7 @@ export default function UploadFileForm({ kind }: Props) {
           disabled={loading}
           className="mt-4 rounded-lg bg-rose px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-rose/20 hover:bg-rose-dark disabled:opacity-40 transition-colors btn-press"
         >
-          {loading ? 'Uploading…' : 'Upload'}
+          {loading ? 'Adding…' : 'Add'}
         </button>
       </form>
 
@@ -217,7 +223,7 @@ export default function UploadFileForm({ kind }: Props) {
             Collection Options
           </p>
           <p className="mt-2 text-sm text-text-muted">
-            Upload complete. Add to a collection?
+            Added. Add to a collection?
           </p>
 
           {collectionSuccess ? (
