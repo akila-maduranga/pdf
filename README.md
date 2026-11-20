@@ -22,10 +22,9 @@ deterrent, not a DRM guarantee.
 2. **SQL editor** → paste and run `supabase/schema.sql` from this repo.
    (If you're upgrading an existing Walkata/Vault install, this file is
    safe to re-run — it only creates missing tables/columns.)
-3. **Storage** → create two buckets, both set to **Private**:
-   - `pdf-files`
-   - `images`
-   (Names must match `SUPABASE_PDF_BUCKET` / `SUPABASE_IMAGE_BUCKET` below if you rename them.)
+3. **Storage** — no longer needed for new content. PDFs and images are now
+   added by **Cloudflare R2 URL** (see section 1b). The `pdf-files` / `images`
+   buckets are only read as a fallback for items created before the switch.
 4. **Project Settings → API** → copy:
    - Project URL → `NEXT_PUBLIC_SUPABASE_URL`
    - `anon` public key → `NEXT_PUBLIC_SUPABASE_ANON_KEY` (not actually used for
@@ -33,6 +32,21 @@ deterrent, not a DRM guarantee.
      service key on the server, but Supabase's client requires one)
    - `service_role` secret key → `SUPABASE_SERVICE_ROLE_KEY` — **never expose
      this in client code**, it's used only in server routes.
+
+## 1b. Cloudflare R2 (PDFs & images)
+
+In **/admin/files** and **/admin/images**, paste the R2 URL of the file (and
+optionally a thumbnail URL) instead of uploading a file. The URL is stored in
+the existing `storage_path` / `thumbnail_path` columns — no schema change.
+
+The URL must be `https` and publicly readable by the server (an `r2.dev` URL
+or a custom domain connected to the bucket). The browser still never receives
+that URL: `/api/file-stream`, `/api/image-stream` and `/api/thumb` fetch it
+server-side and stream the bytes back. Deleting an item removes the database
+row only; the object in R2 is left untouched.
+
+Optional: restrict which hosts can be added with
+`R2_ALLOWED_HOSTS=pub-xxxx.r2.dev,files.example.com`.
 
 ## 2. Environment variables
 
@@ -44,6 +58,8 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=...
 SUPABASE_SERVICE_ROLE_KEY=...
 SUPABASE_PDF_BUCKET=pdf-files
 SUPABASE_IMAGE_BUCKET=images
+# optional, comma-separated hostnames allowed for R2 URLs
+R2_ALLOWED_HOSTS=
 ADMIN_PASSWORD=pick-a-real-password
 ADMIN_SESSION_SECRET=any-long-random-string
 ```
